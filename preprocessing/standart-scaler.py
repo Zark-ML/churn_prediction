@@ -69,8 +69,16 @@ class StandardScaler(AbstractPreprocessor):
         Raises:
             IOError: If an error occurs while writing to the file.
         """
-        with open(file_path, 'w') as file:
-            json.dump({'mean': self.mean_.tolist(), 'std': self.std_.tolist()}, file)
+        with open(file_path, 'a') as file:
+            try:
+                scaling_dict = json.loads(file_path)
+
+            except:
+                scaling_dict = dict()
+            
+            scaling_dict['Standard_Scaler'] = {'mean': self.mean_.tolist(), 'std': self.std_.tolist()}
+
+            json.dump(scaling_dict, file)
 
     def load(self, file_path):
         """
