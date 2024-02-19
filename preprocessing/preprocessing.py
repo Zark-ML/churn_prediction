@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from loguru import logger
 
 class AbstractPreprocessor(ABC):
     """
@@ -7,17 +6,13 @@ class AbstractPreprocessor(ABC):
 
     This class provides a framework for creating reusable and modular data preprocessing steps.
     Child classes must implement abstract methods to customize specific preprocessing tasks.
-
-    Attributes:
-        logger (loguru.Logger): A Loguru logger instance for recording messages.
     """
 
     def __init__(self):
         """
-        Initializes the preprocessor, creating a default Loguru logger with the class name.
+        Initializes the preprocessor
         """
-        self.logger = logger(__name__)
-
+        pass
     @abstractmethod
     def fit(self, data):
         """
@@ -33,9 +28,7 @@ class AbstractPreprocessor(ABC):
         Raises:
             NotImplementedError: This method must be implemented in child classes.
         """
-
-        raise NotImplementedError("This method must be implemented in child classes")
-
+        pass
     @abstractmethod
     def transform(self, data):
         """
@@ -55,8 +48,7 @@ class AbstractPreprocessor(ABC):
         Raises:
             NotImplementedError: This method must be implemented in child classes.
         """
-
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     def fit_transform(self, data):
         """
@@ -75,34 +67,3 @@ class AbstractPreprocessor(ABC):
 
         self.fit(data)
         return self.transform(data)
-
-    def _log_info(self, message):
-        """
-        Logs an informational message using the logger.
-        """
-        self.logger.info(message)
-
-    def _log_debug(self, message):
-        """
-        Logs a debug message using the logger.
-        """
-        self.logger.debug(message)
-
-    def _log_warning(self, message):
-        """
-        Logs a warning message using the logger.
-        """
-        self.logger.warning(message)
-
-    def _log_error(self, message, exception=None):
-        """
-        Logs an error message using the logger.
-
-        Args:
-            message (str): The message to be logged.
-            exception (Exception, optional): An optional exception object to log.
-        """
-        if exception:
-            self.logger.error(message, exc_info=exception)
-        else:
-            self.logger.error(message)
