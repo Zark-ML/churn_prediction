@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from loguru import logger
+
 
 class MlPipeline(ABC):
     """
@@ -16,7 +16,8 @@ class MlPipeline(ABC):
         """
         Initializes the pipeline, creating a default Loguru logger with the class name.
         """
-        self.logger = logger(__name__)
+
+        pass
 
     @abstractmethod
     def ingest_data(self):
@@ -30,7 +31,7 @@ class MlPipeline(ABC):
             NotImplementedError: This method must be implemented in child classes.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def validate_data(self, data):
@@ -47,7 +48,7 @@ class MlPipeline(ABC):
             ValueError: If data quality issues are detected.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def preprocess_data(self, data):
@@ -64,7 +65,7 @@ class MlPipeline(ABC):
             The preprocessed data.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def train_model(self, preprocessed_data):
@@ -81,7 +82,7 @@ class MlPipeline(ABC):
             The trained model.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def analyze_model(self, model, data):
@@ -99,7 +100,7 @@ class MlPipeline(ABC):
             Evaluation results (e.g., accuracy, F1-score).
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def version_model(self, model, version):
@@ -114,7 +115,7 @@ class MlPipeline(ABC):
             version: The version identifier for the model.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def save_model(self, model, version):
@@ -126,7 +127,7 @@ class MlPipeline(ABC):
             version: The version identifier for the model.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
+        pass
 
     @abstractmethod
     def load_model(self, version):
@@ -140,8 +141,8 @@ class MlPipeline(ABC):
             The loaded model object.
         """
 
-        raise NotImplementedError("This method must be implemented in child classes")
-    
+        pass
+
     def run(self):
         """
         Executes the complete machine learning pipeline.
@@ -158,31 +159,4 @@ class MlPipeline(ABC):
         Logs progress and results using the internal logger.
         """
 
-        try:
-            self.logger.info("Starting ML Pipeline...")
-
-            data = self.ingest_data()
-            self.logger.info("Data ingested successfully.")
-
-            self.validate_data(data)
-            self.logger.info("Data validated successfully.")
-
-            preprocessed_data = self.preprocess_data(data)
-            self.logger.info("Data preprocessed successfully.")
-
-            model = self.train_model(preprocessed_data) or self.load_model('version')
-            self.logger.info("Model trained successfully.")
-
-            analysis_results = self.analyze_model(model, data)
-            self.logger.info("Model analyzed successfully:")
-            for metric, value in analysis_results.items():
-                self.logger.info(f"- {metric}: {value}")
-
-            self.version_model(model, version=input('Enter Version: '))
-            self.logger.info("Model versioned successfully.")
-
-            self.logger.info("ML Pipeline completed successfully!")
-        except Exception as e:
-            self.logger.error("An error occurred during the pipeline:", exc_info=e)
-        finally:
-            pass
+        pass
