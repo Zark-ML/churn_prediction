@@ -65,5 +65,4 @@ class AbstractPreprocessor(ABC):
                 implementation.
         """
 
-        self.fit(data)
-        return self.transform(data)
+        pass
