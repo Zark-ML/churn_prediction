@@ -2,14 +2,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import scipy
-import skfda
 import mrmr
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.linear_model import Lasso
 from catboost import CatBoostClassifier
+
+import pandas as pd
+
+def get_non_numerical_columns(df):
+    non_numerical_columns = df.select_dtypes(exclude=['number']).columns.tolist()
+    return non_numerical_columns
 
 class Feature_Selection:
     """A class for feature selection algorithms.
@@ -49,7 +53,7 @@ class Feature_Selection:
 
         if n is None:
             return self.feature_importance
-        return dict(list(self.feature_importance.items())[:n])
+        return dict(list(self.feature_importance)[:n])
 
 
 class mrmr_selection(Feature_Selection):
@@ -223,5 +227,13 @@ class catboost_selection(Feature_Selection):
                                learning_rate=0.1,
                                loss_function='Logloss',
                                verbose=False)
-        model.fit(self.data, self.target, cat_features='auto')
+        model.fit(self.data, self.target, cat_features=get_non_numerical_columns(self.data))
         self.feature_importance = sorted(dict(zip(self.data.columns, model.get_feature_importance())).items(), key=lambda x: x[1], reverse=True)
+
+
+if __name__ == '__main__':
+    df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
+    selector = catboost_selection(df.drop('Churn', axis=1), df['Churn'], 'MIQ')
+    selector.fit()
+    print(selector.get_importances())
