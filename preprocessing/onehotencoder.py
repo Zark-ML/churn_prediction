@@ -54,9 +54,7 @@ class OneHotencoder(AbstractPreprocessor):
 
         self.encoded = self.data_.copy()
 
-        self.encoded['TotalCharges'] = self.encoded['TotalCharges'].replace(' ', 0)
 
-        self.encoded['TotalCharges'] = self.encoded['TotalCharges'].astype('float64')
 
         new_col = ['gender', 'SeniorCitizen', 'Partner', 'Dependents',
                    'PhoneService', 'MultipleLines', 'InternetService',
@@ -77,6 +75,9 @@ class OneHotencoder(AbstractPreprocessor):
 
         drop_col = ['gender_Female', 'SeniorCitizen_0', 'Partner_No', 'Dependents_No', 'PhoneService_No',
                     'PaperlessBilling_No']
+        
+        self.encoded['TotalCharges'] = self.encoded['TotalCharges'].replace(' ', 0)
+        self.encoded['TotalCharges'] = self.encoded['TotalCharges'].astype('float64')
 
         self.encoded = self.encoded.drop(columns=drop_col)
 
@@ -115,7 +116,7 @@ class OneHotencoder(AbstractPreprocessor):
         self.encoded.to_csv(data_path, index=False)
 
 
-# if __name__ == '__main__':
-#     encode = OneHotencoder()
-#     encode.fit_transform(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
-#     encode.save()
+if __name__ == '__main__':
+    encode = OneHotencoder()
+    encode.fit_transform(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    encode.save()
