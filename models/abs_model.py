@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
 
 
 class Model(ABC):
@@ -22,7 +21,8 @@ class Model(ABC):
         gs_parameter_tune(self, parameters): Abstract method for grid search parameter tuning.
         __str__(self): Returns the name of the model.
     """
-
+    
+    @abstractmethod
     def __init__(self, name: str):
         """
         Initializes a new Model instance.
@@ -30,21 +30,17 @@ class Model(ABC):
         Parameters:
             name (str): The name of the model.
         """
-        self.name = name
-        self.__is_trained = False
-        self.model = None
+        pass
 
-    def __is_train(self):
+    @abstractmethod
+    def _is_train(self):
         """
         Checks if the model is trained.
 
         Returns:
             bool: True if the model is trained, False otherwise.
         """
-        if self.__is_trained:
-            return True
-        logger.warning(f'{self} is not trained yet')
-        return False
+        pass
 
     @abstractmethod
     def train(self, data, label):
@@ -107,6 +103,7 @@ class Model(ABC):
         """
         pass
 
+    @abstractmethod
     def __str__(self):
         """
         Returns the name of the model.
@@ -114,4 +111,4 @@ class Model(ABC):
         Returns:
             str: The name of the model.
         """
-        return self.name
+        pass
