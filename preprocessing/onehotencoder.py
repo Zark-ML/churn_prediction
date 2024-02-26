@@ -33,7 +33,7 @@ class OneHotencoder(AbstractPreprocessor):
         if data_path:
             self.data_path = data_path
             self.load(data_path)
-        elif data:
+        elif data.shape:
             self.data_ = data
         return self
 
@@ -50,7 +50,7 @@ class OneHotencoder(AbstractPreprocessor):
         if self.data_ is None:
             raise ValueError("Input data is not provided.")
 
-        self.data_ = self.data_.drop('customerID', axis=1)
+        
 
         self.encoded = self.data_.copy()
 
@@ -76,8 +76,6 @@ class OneHotencoder(AbstractPreprocessor):
         drop_col = ['gender_Female', 'SeniorCitizen_0', 'Partner_No', 'Dependents_No', 'PhoneService_No',
                     'PaperlessBilling_No']
         
-        self.encoded['TotalCharges'] = self.encoded['TotalCharges'].replace(' ', 0)
-        self.encoded['TotalCharges'] = self.encoded['TotalCharges'].astype('float64')
 
         self.encoded = self.encoded.drop(columns=drop_col)
 
@@ -106,7 +104,7 @@ class OneHotencoder(AbstractPreprocessor):
         """
         self.data_ = pd.read_csv(data_path)
 
-    def save(self, data_path='data/encoded.csv'):
+    def save(self, data_path='data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv'):
         """
         Save the encoded data to a file.
 
@@ -117,6 +115,11 @@ class OneHotencoder(AbstractPreprocessor):
 
 
 if __name__ == '__main__':
+    from manipulations import Manipulations
+    manipulation = Manipulations()
+    data = manipulation.manipulate(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    # print(data)
     encode = OneHotencoder()
-    encode.fit_transform(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    encode.fit(data = data)
+    encode.transform()
     encode.save()
