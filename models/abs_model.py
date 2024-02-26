@@ -43,7 +43,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def train(self, data, label):
+    def fit(self, data, label):
         """
         Abstract method to train the model.
 

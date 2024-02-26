@@ -28,10 +28,10 @@ class DecisionTreeModel(Model):
         """
         self.name = name
         self._is_trained = False
-        self.model = DecisionTreeClassifier()
+        self.model = DecisionTreeClassifier(random_state=42)
         self.hyper_parameters = None
 
-    def train(self, data, label):
+    def fit(self, data, label):
         """
         Train the Decision Tree Classifier.
 
@@ -95,6 +95,7 @@ class DecisionTreeModel(Model):
 
         self.hyper_parameters = parameters_dict
         self.model.set_params(**self.hyper_parameters)
+        # self.model = DecisionTreeClassifier(**parameters_dict)
 
     def gs_parameter_tune(self, data, label, parameters, scoring ):
         # if not self._is_train():
