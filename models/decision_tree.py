@@ -65,7 +65,7 @@ class DecisionTreeModel(Model):
         Parameters:
             path (str): The path where the model should be saved.
         """
-        if not self.__is_train():
+        if not self._is_train():
             raise ValueError("Model is not trained.")
         # Save the model using appropriate serialization method (e.g., joblib, pickle)
         # Example: joblib.dump(self.model, path)
@@ -82,17 +82,6 @@ class DecisionTreeModel(Model):
         # self.__is_trained = True
         pass
 
-    # def hyper_parameter(self, parameters_dict):
-    #     """
-    #     Perform hyperparameter tuning.
-
-    #     Parameters:
-    #         parameters_dict (dict): Dictionary containing hyperparameters.
-    #     """
-    #     # Perform hyperparameter tuning using provided dictionary
-        
-    #     self.hyper_parameter = parameters_dict
-    #     self.model.set_params(**self.hyper_parameter)
 
     def hyper_parameter(self, parameters_dict):
         """
