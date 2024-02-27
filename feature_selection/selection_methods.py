@@ -338,6 +338,7 @@ class PCA_Selection(Feature_Selection):
 
 
 if __name__ == '__main__':
+    # Spartak you can use encoded dataset using path: "data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv"
     df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
     df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
     selector = catboost_selection(df.drop('Churn', axis=1), df['Churn'], 'MIQ')
