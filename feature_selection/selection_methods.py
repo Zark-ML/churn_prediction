@@ -2,18 +2,26 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import mrmr
+import shap
+from mrmr import mrmr_classif
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.linear_model import Lasso
 from catboost import CatBoostClassifier
+from typing import Dict
 
 import pandas as pd
 
 def get_non_numerical_columns(df):
     non_numerical_columns = df.select_dtypes(exclude=['number']).columns.tolist()
     return non_numerical_columns
+
+def non_numerical_to_category(df):
+    non_numerical_columns = get_non_numerical_columns(df)
+    for col in non_numerical_columns:
+        df[col] = df[col].astype('category')
+    return df
 
 class Feature_Selection:
     """A class for feature selection algorithms.
@@ -27,18 +35,16 @@ class Feature_Selection:
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
+    def __init__(self, data, target):
         """Initialize the Feature_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: A pandas Series containing target feature.
-            method: A string specifying the feature selection method.
         """
     
         self.data = data
         self.target = target
-        self.method = method
         self.feature_importance = dict()
 
     def get_importances(self, n=None):
@@ -52,44 +58,59 @@ class Feature_Selection:
         """
 
         if n is None:
-            return self.feature_importance
-        return dict(list(self.feature_importance)[:n])
+            try:
+                return dict(sorted(self.feature_importance.items(), key=lambda item: item[1], reverse=True))
+            except:
+                return self.feature_importance
+        return sorted(dict(list(self.feature_importance)[:n]), key=lambda item: item[1], reverse=True)
 
 
-class mrmr_selection(Feature_Selection):
-    """A class for mRMR feature selection.
-
-    This class provides methods for mRMR feature selection.
-
-    Attributes:
-        data: A pandas DataFrame containing the input features.
-        target: Column name of target feature.
-        method: A string specifying the feature selection method.
-        feature_importance: A dictionary containing the feature importances sorted in descending order.
-    """
-
-    def __init__(self, data, target, method):
-        """Initialize the mrmr_selection class.
-
-        Args:
-            data: A pandas DataFrame containing the input features.
-            target: Column name of target feature.
-            method: A string specifying the feature selection method.
+class MRMR(Feature_Selection):
+    def __init__(self, data, target, k=None, s=3):
         """
-
-        super().__init__(data, target, method)
-
-    def fit(self, n=None):
-        """Fit the mrmr_selection class.
-
-        Args:
-            n: An integer specifying the number of top features to return.
+        :param k: number of features to select
+        :param s: number of iterations
         """
+        
+        super().__init__(data, target)
+        
+        self.k = k
+        self.s = s
+        self.data = self.data.drop('Churn', axis=1)
 
-        self.feature_importance = mrmr.mRMR(self.data, self.target, self.method, n)
+    def fit(self, target: pd.DataFrame) -> Dict[str, float]:
+        """
+        :param data: pd.DataFrame, shape (n_samples, n_features)
+        :param target: pd.DataFrame, shape (n_samples, n_labels)
+        :return: dict, feature importance
+        """
+        if self.k is None:
+            self.k = len(self.data.columns)
+        rate_dict = {}
+        for _ in range(self.s):
+            chosen_idx = np.random.choice(len(self.data), replace=False, size=len(self.data) // self.s)
+            data_chosen = self.data.iloc[chosen_idx].reset_index(drop=True)
+            label_chosen = target.iloc[chosen_idx].reset_index(drop=True)
+            selected_features = mrmr_classif(X=data_chosen, y=label_chosen, K=self.k, return_scores=True)
+            F = selected_features[1]
+            corr = selected_features[2]
+            selected = []
+            not_selected = list(data_chosen.columns)
+            for _ in range(self.k):
+                score = F.loc[not_selected] / corr.loc[not_selected, selected].mean(axis=1).fillna(.00001)
+                best = score.index[score.argmax()]
+                if best in rate_dict:
+                    rate_dict[best].append(score.max())
+                else:
+                    rate_dict[best] = [score.max()]
+                selected.append(best)
+                not_selected.remove(best)
+        rate_dict_mean = {key:sum(value) / len(value) for key, value in rate_dict.items()}
+        self.feature_importance = rate_dict_mean
 
 
-class xgb_selection(Feature_Selection):
+
+class Xgb_Selection(Feature_Selection):
     """A class for XGBoost feature selection.
 
     This class provides methods for XGBoost feature selection.
@@ -97,33 +118,31 @@ class xgb_selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
-        """Initialize the xgb_selection class.
+    def __init__(self, data, target):
+        """Initialize the Xgb_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
-        """Fit the xgb_selection class.
+        """Fit the Xgb_Selection class.
 
         Args:
             n: An integer specifying the number of top features to return.
         """
 
-        xgb = XGBClassifier(objective='binary:logistic', random_state=42)
+        xgb = XGBClassifier(objective='binary:logistic', random_state=42, enable_categorical=True)
         xgb.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, xgb.feature_importances_))
 
-class rf_selection(Feature_Selection):
+class Rf_Selection(Feature_Selection):
     """A class for Random Forest feature selection.
 
     This class provides methods for Random Forest feature selection.
@@ -131,12 +150,11 @@ class rf_selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
-        """Initialize the rf_selection class.
+    def __init__(self, data, target):
+        """Initialize the Rf_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
@@ -144,10 +162,10 @@ class rf_selection(Feature_Selection):
             method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
-        """Fit the rf_selection class.
+        """Fit the Rf_Selection class.
 
         Args:
             n: An integer specifying the number of top features to return.
@@ -157,7 +175,7 @@ class rf_selection(Feature_Selection):
         rf.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, rf.feature_importances_))
 
-class lasso_selection(Feature_Selection):
+class Lasso_Selection(Feature_Selection):
     """A class for Lasso feature selection.
 
     This class provides methods for Lasso feature selection.
@@ -165,23 +183,21 @@ class lasso_selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
-        """Initialize the lasso_selection class.
+    def __init__(self, data, target):
+        """Initialize the Lasso_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
-        """Fit the lasso_selection class.
+        """Fit the Lasso_Selection class.
 
         Args:
             n: An integer specifying the number of top features to return.
@@ -190,8 +206,9 @@ class lasso_selection(Feature_Selection):
         lasso = Lasso(alpha=0.1)
         lasso.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, lasso.coef_))
+        
 
-class catboost_selection(Feature_Selection):
+class Catboost_Selection(Feature_Selection):
     """A class for CatBoost feature selection.
 
     This class provides methods for CatBoost feature selection.
@@ -203,37 +220,96 @@ class catboost_selection(Feature_Selection):
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
-        """Initialize the catboost_selection class.
+    def __init__(self, data, target):
+        """Initialize the Catboost_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
-        """Fit the catboost_selection class.
+        """Fit the Catboost_Selection class.
 
         Args:
             n: An integer specifying the number of top features to return.
         """
 
         
-        model = CatBoostClassifier(iterations=100,  
-                               depth=6,        
-                               learning_rate=0.1,
-                               loss_function='Logloss',
-                               verbose=False)
+        model = CatBoostClassifier()
         model.fit(self.data, self.target, cat_features=get_non_numerical_columns(self.data))
         self.feature_importance = sorted(dict(zip(self.data.columns, model.get_feature_importance())).items(), key=lambda x: x[1], reverse=True)
 
+class Shap_Selection(Feature_Selection):
+    """A class for Shap feature selection.
+
+    This class provides methods for Shap feature selection.
+
+    Attributes:
+        data: A pandas DataFrame containing the input features.
+        target: Column name of target feature.
+        method: A string specifying the feature selection method.
+        feature_importance: A dictionary containing the feature importances sorted in descending order.
+    """
+
+    def __init__(self, data, target):
+        """Initialize the Shap_Selection class.
+
+        Args:
+            data: A pandas DataFrame containing the input features.
+            target: Column name of target feature.
+        """
+
+        super().__init__(data, target)
+
+    def fit(self, n=None):
+        """Fit the Shap_Selection class.
+
+        Args:
+            n: An integer specifying the number of top features to return.
+        """
+        model = XGBClassifier(objective='binary:logistic', random_state=42, enable_categorical=True)
+        self.data = self.data.replace([np.inf, -np.inf], 0)
+        self.data = non_numerical_to_category(self.data)
+        model.fit(self.data, self.target)
+        explainer = shap.TreeExplainer(model=model)
+        shap_values = explainer.shap_values(self.data)
+        print(shap_values)
+        self.feature_importance = sorted(dict(zip(self.data.columns, np.abs(shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True)
+
 
 if __name__ == '__main__':
-    df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
+    # df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
+    # selector = Catboost_Selection(df.drop('Churn', axis=1), df['Churn'])
+    # selector.fit()
+    # sum = 0
+    # for i in selector.get_importances():
+    #     sum += i[1]
+    # print(selector.get_importances())
+    # print(sum)
+
+    # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
+    # df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    # df.fillna(df.max(), inplace=True)
+
+    # selector = MRMR(df, 5, k=None, s=3)
+    # selector.fit(target=df['Churn'])
+    # print(selector.get_importances())
+
+    # sum = 0
+    # for i in selector.get_importances().values():
+    #     sum += i
+    # print(sum)
+
+    df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn_tenur_categorical.csv')
     df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
-    selector = catboost_selection(df.drop('Churn', axis=1), df['Churn'], 'MIQ')
+    selector = Shap_Selection(df.drop('Churn', axis=1), df['Churn'])
     selector.fit()
+    sum = 0
+    for i in selector.get_importances():
+        sum += i[1]
     print(selector.get_importances())
+    print(sum)
