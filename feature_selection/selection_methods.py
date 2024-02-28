@@ -8,7 +8,10 @@ from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.linear_model import Lasso
+from sklearn.feature_selection import RFE
 from catboost import CatBoostClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.decomposition import PCA
 from typing import Dict
 
 import pandas as pd
@@ -242,6 +245,109 @@ class Catboost_Selection(Feature_Selection):
         model.fit(self.data, self.target, cat_features=get_non_numerical_columns(self.data))
         self.feature_importance = sorted(dict(zip(self.data.columns, model.get_feature_importance())).items(), key=lambda x: x[1], reverse=True)
 
+class RFE_Selection(Feature_Selection):
+    """A class for Recursive Feature Elimination (RFE) feature selection.
+
+    This class provides methods for RFE feature selection.
+
+    Attributes:
+        data: A pandas DataFrame containing the input features.
+        target: Column name of target feature.
+        method: A string specifying the feature selection method.
+        feature_importance: A dictionary containing the feature importances sorted in descending order.
+    """
+
+    def __init__(self, data, target, method):
+        """Initialize the RFE_Selection class.
+
+        Args:
+            data: A pandas DataFrame containing the input features.
+            target: Column name of target feature.
+            method: A string specifying the feature selection method.
+        """
+
+        super().__init__(data, target, method)
+
+    def fit(self, n=None):
+        """Fit the RFE_Selection class.
+
+        Args:
+            n: An integer specifying the number of top features to return.
+        """
+
+        estimator = LinearRegression()
+        selector = RFE(estimator, n_features_to_select=n)
+        selector = selector.fit(self.data, self.target)
+        self.feature_importance = dict(zip(self.data.columns, selector.ranking_))
+
+class GBM_Selection(Feature_Selection):
+    """A class for Gradient Boosting Machine (GBM) feature selection.
+
+    This class provides methods for GBM feature selection.
+
+    Attributes:
+        data: A pandas DataFrame containing the input features.
+        target: Column name of target feature.
+        method: A string specifying the feature selection method.
+        feature_importance: A dictionary containing the feature importances sorted in descending order.
+    """
+
+    def __init__(self, data, target, method):
+        """Initialize the GBM_Selection class.
+
+        Args:
+            data: A pandas DataFrame containing the input features.
+            target: Column name of target feature.
+            method: A string specifying the feature selection method.
+        """
+
+        super().__init__(data, target, method)
+
+    def fit(self, n=None):
+        """Fit the GBM_Selection class.
+
+        Args:
+            n: An integer specifying the number of top features to return.
+        """
+
+        gbm = GradientBoostingClassifier()
+        gbm.fit(self.data, self.target)
+        self.feature_importance = dict(zip(self.data.columns, gbm.feature_importances_))
+
+class PCA_Selection(Feature_Selection):
+    """A class for Principal Component Analysis (PCA) feature selection.
+
+    This class provides methods for PCA feature selection.
+
+    Attributes:
+        data: A pandas DataFrame containing the input features.
+        target: Column name of target feature.
+        method: A string specifying the feature selection method.
+        feature_importance: A dictionary containing the variance explained by each principal component.
+    """
+
+    def __init__(self, data, target, method):
+        """Initialize the PCA_Selection class.
+
+        Args:
+            data: A pandas DataFrame containing the input features.
+            target: Column name of target feature.
+            method: A string specifying the feature selection method.
+        """
+
+        super().__init__(data, target, method)
+
+    def fit(self, n=None):
+        """Fit the PCA_Selection class.
+
+        Args:
+            n: An integer specifying the number of top principal components to return.
+        """
+
+        pca = PCA(n_components=n)
+        pca.fit(self.data)
+        self.feature_importance = pca.explained_variance_ratio_
+
 class Shap_Selection(Feature_Selection):
     """A class for Shap feature selection.
 
@@ -281,6 +387,7 @@ class Shap_Selection(Feature_Selection):
 
 
 if __name__ == '__main__':
+    # Spartak you can use encoded dataset using path: "data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv"
     # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
     # df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
     # selector = Catboost_Selection(df.drop('Churn', axis=1), df['Churn'])
