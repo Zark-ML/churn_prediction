@@ -14,10 +14,9 @@ class FeatureEngineering():
             self.load(data_path)
         elif data:
             self.data_ = data
-        data
-        labels = []
-        self.data_['tenure'][self.data_['tenure']==0] = 1
+        self.data_.loc[self.data_['tenure'] == 0, 'tenure'] = 1
         self.data_['tenure_group'] = (self.data_['tenure']-1) // 12
+        # labels = []
         # for i in range(1, 73, 12):
         #     labels.append("{0} - {1}".format(i, i + 11))
         # print(labels)
@@ -33,11 +32,6 @@ class FeatureEngineering():
         elif data:
             self.data_ = data
 
-        label = self.data_['Churn']
-
-        self.data_.drop('Churn', axis=1, inplace=True)
-
-
         self.data_['Monthly/Total_Charges'] = (self.data_['MonthlyCharges'] / self.data_['TotalCharges'])
         self.data_['TotalCharges/tenure'] = (self.data_['TotalCharges'] / self.data_['tenure'])
 
@@ -45,7 +39,6 @@ class FeatureEngineering():
 
         self.data_['Monthly/Total_Charges'].replace(float('inf'),m_t_max, inplace=True)
 
-        self.data_['Churn'] = label
         return self
 
     def load(self, data_path):
@@ -58,7 +51,7 @@ class FeatureEngineering():
         self.data_ = pd.read_csv(data_path)
 
 
-    def save(self, data_path='data/WA_Fn-UseC_-Telco-Customer-Churn-Feature-Engineering.csv'):
+    def save(self, data_path='../data/Telco-Customer-Churn-encoded-data-FE.csv'):
         """
         Save the cleaned data to a file.
 
@@ -70,6 +63,6 @@ class FeatureEngineering():
 
 if __name__ == '__main__':
     df = FeatureEngineering()\
-    .to_categoric(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv')\
+    .to_categoric(data_path='../data/Telco-Customer-Churn-encoded-data.csv')\
     .process()\
-    .save(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn-encoded-FE.csv')
+    .save(data_path='../data/Telco-Customer-Churn-encoded-data-FE.csv')

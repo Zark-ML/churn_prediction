@@ -20,7 +20,7 @@ class OneHotencoder(AbstractPreprocessor):
         self.data_path = None
         self.encoded = None
 
-    def fit(self, data_path=None, data=None):
+    def fit(self, data_path=None, data=None, label = None, label_path = None):
         """
         Fit the preprocessor with data.
 
@@ -31,11 +31,13 @@ class OneHotencoder(AbstractPreprocessor):
         Returns:
             OneHotencoder: The fitted preprocessor instance.
         """
-        if data_path:
+        if data_path and label_path:
             self.data_path = data_path
-            self.load(data_path)
+            self.label_path = label_path
+            self.load(data_path, label_path)
         elif data.shape:
             self.data_ = data
+            self.label_ = label
         return self
 
     def transform(self):
@@ -68,18 +70,15 @@ class OneHotencoder(AbstractPreprocessor):
 
         self.encoded = pd.concat([self.encoded, self.data_], axis=1)
         self.encoded = self.encoded.drop(columns=new_col)
-
-        for i in self.encoded.columns[:-4]:
+        for i in self.encoded.columns[:-3]:
             self.encoded[i] = np.where(self.encoded[i] == True, 1, 0)
-
-        self.encoded['Churn'] = np.where(self.encoded['Churn'] == 'Yes', 1, 0)
 
         drop_col = ['gender_Female', 'SeniorCitizen_0', 'Partner_No', 'Dependents_No', 'PhoneService_No',
                     'PaperlessBilling_No']
         
 
         self.encoded = self.encoded.drop(columns=drop_col)
-
+        self.label_encoding()
         return self.encoded
 
     def fit_transform(self, data_path=None, data=None):
@@ -95,8 +94,11 @@ class OneHotencoder(AbstractPreprocessor):
         """
         self.fit(data_path=data_path, data=data)
         return self.transform()
+    def label_encoding(self):
+        self.label_['Churn'] = np.where(self.label_ == 'Yes', 1, 0)
+        return self.label_
 
-    def load(self, data_path):
+    def load(self, data_path, label_path):
         """
         Load data from a given path.
 
@@ -104,8 +106,9 @@ class OneHotencoder(AbstractPreprocessor):
             data_path (str): The path to the input data file.
         """
         self.data_ = pd.read_csv(data_path)
+        self.label_ = pd.read_csv(label_path)
 
-    def save(self, data_path='data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv'):
+    def save(self, data_path='../data/Telco-Customer-Churn-encoded-data.csv', label_path='../data/Telco-Customer-Churn-encoded-label.csv'):
         """
         Save the encoded data to a file.
 
@@ -113,14 +116,16 @@ class OneHotencoder(AbstractPreprocessor):
             data_path (str, optional): The path to save the encoded data.
         """
         self.encoded.to_csv(data_path, index=False)
+        pd.DataFrame(self.label_).to_csv(label_path, index=False)
 
 
 if __name__ == '__main__':
     from manipulations import Manipulations
     manipulation = Manipulations()
-    data = manipulation.manipulate(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    data = manipulation.manipulate(data_path='../data/Telco-Customer-Churn-data.csv')
     # print(data)
     encode = OneHotencoder()
-    encode.fit(data = data)
+    label = pd.read_csv('../data/Telco-Customer-Churn-label.csv')
+    encode.fit(data = data, label = label)
     encode.transform()
     encode.save()
