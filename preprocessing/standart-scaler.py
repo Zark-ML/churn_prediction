@@ -1,4 +1,4 @@
-from preprocessing import AbstractPreprocessor
+from preprocessing.preprocessing import AbstractPreprocessor
 import numpy as np
 import json
 
