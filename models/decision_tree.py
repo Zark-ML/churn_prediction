@@ -1,10 +1,9 @@
-from abs_model import Model
+from models.abs_model import Model
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from abc import ABC, abstractmethod
-
 
 class DecisionTreeModel(Model):
     """

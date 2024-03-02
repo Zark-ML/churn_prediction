@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class MlPipeline(ABC):
     """
     Abstract base class for a machine learning pipeline, encapsulating common workflow steps.
