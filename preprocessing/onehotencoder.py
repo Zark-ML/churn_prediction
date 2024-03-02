@@ -3,6 +3,7 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import pandas as pd
 
+
 class OneHotencoder(AbstractPreprocessor):
     """
     One-hot encoding preprocessor class.
