@@ -1,4 +1,13 @@
 from abc import ABC, abstractmethod
+from models.decision_tree import DecisionTreeModel
+from preprocessing.onehotencoder import OneHotEncoder
+from preprocessing.standart_scaler import StandardScaler
+from preprocessing.manipulations import Manipulations
+from preprocessing.feature_engineering import FeatureEngineering
+import pandas as pd
+import numpy as np
+from typing import Union
+
 
 class MlPipeline(ABC):
     """
@@ -11,11 +20,8 @@ class MlPipeline(ABC):
         logger (loguru.Logger): A Loguru logger instance for recording messages.
     """
 
-    def __init__(self):
-        """
-        Initializes the pipeline, creating a default Loguru logger with the class name.
-        """
-
+    def __init__(self, model_name: str, preprocessing_steps: dict, feature_selecton_steps: dict, model_params: dict, data: pd.DataFrame, target: pd.Series, data_path: str, target_path,  model_path: str, version: str) -> None:
+        """ Initializes the machine learning pipeline with the specified parameters. """
         pass
 
     @abstractmethod
@@ -159,3 +165,45 @@ class MlPipeline(ABC):
         """
 
         pass
+
+
+
+class MainPipeline(MlPipeline):
+    """
+    Concrete implementation of a machine learning pipeline for the Telco Customer Churn dataset.
+
+    This class extends the abstract MlPipeline class with custom
+    logic for data ingestion, preprocessing, and model training. It uses a DecisionTreeModel
+    as the underlying machine learning model. The pipeline is designed to be reusable and extensible.
+    """
+    
+    def __init__(self, 
+                 model_name: Union[str, None] = None, 
+                 preprocessing_steps: Union[dict, None] = None, 
+                 feature_selecton_steps: Union[dict, None] = None, 
+                 model_params: Union[dict, None] = None, 
+                 data: Union[pd.DataFrame, None] = None, 
+                 target: Union[pd.Series, None] = None, 
+                 data_path: Union[str, None] = None, 
+                 target_path: Union[str, None] = None, 
+                 model_path: Union[str, None] = None, 
+                 version: Union[str, None] = None) -> None:
+
+        """
+        Initializes the machine learning pipeline with the specified parameters.
+        """
+        self.model_name = model_name
+        self.preprocessing_steps = preprocessing_steps
+        self.feature_selecton_steps = feature_selecton_steps
+        self.model_params = model_params
+        self.data = data
+        self.target = target
+        self.data_path = data_path
+        self.target_path = target_path
+        self.model_path = model_path
+        self.version = version
+
+    def ingest_data(self):
+        if self.data_path & self.target_path:
+            self.data = pd.read_csv(self.data_path)
+        
