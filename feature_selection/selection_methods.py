@@ -5,6 +5,7 @@ import seaborn as sns
 import shap
 from mrmr import mrmr_classif
 from xgboost import XGBClassifier
+from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.linear_model import Lasso
@@ -14,7 +15,6 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.decomposition import PCA
 from typing import Dict
 
-import pandas as pd
 
 def get_non_numerical_columns(df):
     non_numerical_columns = df.select_dtypes(exclude=['number']).columns.tolist()
@@ -34,7 +34,6 @@ class Feature_Selection:
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: A pandas Series containing target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
@@ -79,9 +78,8 @@ class MRMR(Feature_Selection):
         
         self.k = k
         self.s = s
-        self.data = self.data.drop('Churn', axis=1)
 
-    def fit(self, target: pd.DataFrame) -> Dict[str, float]:
+    def fit(self):
         """
         :param data: pd.DataFrame, shape (n_samples, n_features)
         :param target: pd.DataFrame, shape (n_samples, n_labels)
@@ -93,7 +91,7 @@ class MRMR(Feature_Selection):
         for _ in range(self.s):
             chosen_idx = np.random.choice(len(self.data), replace=False, size=len(self.data) // self.s)
             data_chosen = self.data.iloc[chosen_idx].reset_index(drop=True)
-            label_chosen = target.iloc[chosen_idx].reset_index(drop=True)
+            label_chosen = self.target.iloc[chosen_idx].reset_index(drop=True)
             selected_features = mrmr_classif(X=data_chosen, y=label_chosen, K=self.k, return_scores=True)
             F = selected_features[1]
             corr = selected_features[2]
@@ -162,7 +160,6 @@ class Rf_Selection(Feature_Selection):
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
         super().__init__(data, target)
@@ -219,7 +216,6 @@ class Catboost_Selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
@@ -239,12 +235,11 @@ class Catboost_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-
+        model = CatBoostClassifier(random_state=42, verbose=False)
+        model.fit(self.data, self.target)
+        self.feature_importance = dict(zip(self.data.columns, model.feature_importances_))
         
-        model = CatBoostClassifier()
-        model.fit(self.data, self.target, cat_features=get_non_numerical_columns(self.data))
-        self.feature_importance = sorted(dict(zip(self.data.columns, model.get_feature_importance())).items(), key=lambda x: x[1], reverse=True)
-
+        
 class RFE_Selection(Feature_Selection):
     """A class for Recursive Feature Elimination (RFE) feature selection.
 
@@ -253,20 +248,18 @@ class RFE_Selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
+    def __init__(self, data, target):
         """Initialize the RFE_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
         """Fit the RFE_Selection class.
@@ -288,20 +281,18 @@ class GBM_Selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
-    def __init__(self, data, target, method):
+    def __init__(self, data, target):
         """Initialize the GBM_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
         """Fit the GBM_Selection class.
@@ -314,6 +305,8 @@ class GBM_Selection(Feature_Selection):
         gbm.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, gbm.feature_importances_))
 
+# FIXME:
+# TODO: PCA Selection should be wether removed or changed
 class PCA_Selection(Feature_Selection):
     """A class for Principal Component Analysis (PCA) feature selection.
 
@@ -322,20 +315,18 @@ class PCA_Selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the variance explained by each principal component.
     """
 
-    def __init__(self, data, target, method):
+    def __init__(self, data, target):
         """Initialize the PCA_Selection class.
 
         Args:
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
-            method: A string specifying the feature selection method.
         """
 
-        super().__init__(data, target, method)
+        super().__init__(data, target)
 
     def fit(self, n=None):
         """Fit the PCA_Selection class.
@@ -346,7 +337,7 @@ class PCA_Selection(Feature_Selection):
 
         pca = PCA(n_components=n)
         pca.fit(self.data)
-        self.feature_importance = pca.explained_variance_ratio_
+        self.feature_importance = dict(zip(self.data.columns, pca.explained_variance_ratio_))
 
 class Shap_Selection(Feature_Selection):
     """A class for Shap feature selection.
@@ -356,7 +347,6 @@ class Shap_Selection(Feature_Selection):
     Attributes:
         data: A pandas DataFrame containing the input features.
         target: Column name of target feature.
-        method: A string specifying the feature selection method.
         feature_importance: A dictionary containing the feature importances sorted in descending order.
     """
 
@@ -383,20 +373,21 @@ class Shap_Selection(Feature_Selection):
         explainer = shap.TreeExplainer(model=model)
         shap_values = explainer.shap_values(self.data)
         print(shap_values)
-        self.feature_importance = sorted(dict(zip(self.data.columns, np.abs(shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True)
+        self.feature_importance = dict(sorted(dict(zip(self.data.columns, np.abs(shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True))
 
 
 if __name__ == '__main__':
     # Spartak you can use encoded dataset using path: "data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv"
-    # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
-    # df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
-    # selector = Catboost_Selection(df.drop('Churn', axis=1), df['Churn'])
-    # selector.fit()
-    # sum = 0
-    # for i in selector.get_importances():
-    #     sum += i[1]
-    # print(selector.get_importances())
-    # print(sum)
+    df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
+    df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
+    selector = Catboost_Selection(df.drop('Churn', axis=1), df['Churn'])
+    selector.fit()
+    sum = 0
+    print(selector.get_importances())
+    for i in selector.get_importances().values():
+        sum += i
+    
+    print(sum)
 
     # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
     # df.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -411,12 +402,12 @@ if __name__ == '__main__':
     #     sum += i
     # print(sum)
 
-    df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn_tenur_categorical.csv')
-    df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
-    selector = Shap_Selection(df.drop('Churn', axis=1), df['Churn'])
-    selector.fit()
-    sum = 0
-    for i in selector.get_importances():
-        sum += i[1]
-    print(selector.get_importances())
-    print(sum)
+    # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn_tenur_categorical.csv')
+    # df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
+    # selector = Shap_Selection(df.drop('Churn', axis=1), df['Churn'])
+    # selector.fit()
+    # sum = 0
+    # for i in selector.get_importances().values():
+    #     sum += i
+    # print(selector.get_importances())
+    # print(sum)

@@ -1,0 +1,49 @@
+Column,Multiplication
+Contract_Month-to-month,3.9162898489305247e-10
+gender_Male,1.3012659884485177e-11
+SeniorCitizen_1,2.9586736499326436e-13
+InternetService_Fiber optic,1.2128300220121953e-13
+OnlineSecurity_No,1.7374736727138972e-15
+TechSupport_No,1.0865482937540626e-15
+Dependents_Yes,5.538221793538289e-17
+OnlineBackup_No,3.42239920589147e-17
+InternetService_DSL,9.358940736073328e-19
+MultipleLines_No,2.1494370950002598e-19
+Partner_Yes,4.392300514815892e-20
+PhoneService_Yes,1.7041343476497035e-20
+DeviceProtection_No,1.2122735124617625e-20
+OnlineBackup_Yes,1.0674015087427941e-20
+TechSupport_Yes,6.595645412448867e-21
+StreamingTV_No,2.3770141275297267e-21
+StreamingMovies_Yes,1.7913934285720997e-21
+DeviceProtection_Yes,1.321612239147724e-21
+MultipleLines_Yes,2.757962079118976e-22
+StreamingTV_Yes,2.4893344108471437e-22
+StreamingMovies_No,1.519740956504623e-23
+OnlineSecurity_Yes,7.455594744240355e-24
+MultipleLines_No phone service,1.7381728132520787e-28
+InternetService_No,6.79211982084628e-29
+OnlineSecurity_No internet service,3.492407698531415e-29
+DeviceProtection_No internet service,1.8605158387212014e-29
+TechSupport_No internet service,1.4136896310888425e-29
+StreamingTV_No internet service,3.1556446791110064e-30
+StreamingMovies_No internet service,1.2869852142251901e-31
+OnlineBackup_No internet service,7.285554370290874e-32
+TotalCharges/tenure,1.4584426403682769e-34
+MonthlyCharges,6.611334527183998e-35
+TotalCharges,1.1202729272668653e-36
+Monthly/Total_Charges,2.9894142734104743e-37
+PaperlessBilling_Yes,1.7263508431466929e-40
+PaymentMethod_Electronic check,3.993413010380219e-41
+Contract_Two year,7.086174782128781e-42
+Contract_One year,7.887750622672501e-43
+PaymentMethod_Mailed check,4.923607583375197e-43
+PaymentMethod_Bank transfer (automatic),1.5947997431563038e-44
+PaymentMethod_Credit card (automatic),5.97747937113303e-45
+tenure_group_52 - 63,1.6524348304261468e-45
+tenure_group_26 - 37,1.4791574668491016e-45
+tenure_group_39 - 50,5.732699381865899e-47
+tenure_group_13 - 24,3.2897778576504405e-47
+tenure_group_0 - 11,8.00854207874798e-48
+tenure,7.887976873782102e-48
+tenure_group_65 - 76,7.078075362943192e-49
