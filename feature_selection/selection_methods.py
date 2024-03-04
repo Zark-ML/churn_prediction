@@ -13,7 +13,8 @@ from sklearn.decomposition import PCA
 
 
 def get_non_numerical_columns(df):
-    non_numerical_columns = df.select_dtypes(exclude=['number']).columns.tolist()
+    non_numerical_columns = df.select_dtypes(
+        exclude=['number']).columns.tolist()
     return non_numerical_columns
 
 
@@ -87,16 +88,19 @@ class MRMR(Feature_Selection):
             self.k = len(self.data.columns)
         rate_dict = {}
         for _ in range(self.s):
-            chosen_idx = np.random.choice(len(self.data), replace=False, size=len(self.data) // self.s)
+            chosen_idx = np.random.choice(
+                len(self.data), replace=False, size=len(self.data) // self.s)
             data_chosen = self.data.iloc[chosen_idx].reset_index(drop=True)
             label_chosen = self.target.iloc[chosen_idx].reset_index(drop=True)
-            selected_features = mrmr_classif(X=data_chosen, y=label_chosen, K=self.k, return_scores=True)
+            selected_features = mrmr_classif(
+                X=data_chosen, y=label_chosen, K=self.k, return_scores=True)
             F = selected_features[1]
             corr = selected_features[2]
             selected = []
             not_selected = list(data_chosen.columns)
             for _ in range(self.k):
-                score = F.loc[not_selected] / corr.loc[not_selected, selected].mean(axis=1).fillna(.00001)
+                score = F.loc[not_selected] / corr.loc[not_selected,
+                                                       selected].mean(axis=1).fillna(.00001)
                 best = score.index[score.argmax()]
                 if best in rate_dict:
                     rate_dict[best].append(score.max())
@@ -104,7 +108,8 @@ class MRMR(Feature_Selection):
                     rate_dict[best] = [score.max()]
                 selected.append(best)
                 not_selected.remove(best)
-        rate_dict_mean = {key: sum(value) / len(value) for key, value in rate_dict.items()}
+        rate_dict_mean = {key: sum(value) / len(value)
+                          for key, value in rate_dict.items()}
         self.feature_importance = rate_dict_mean
 
 
@@ -136,9 +141,11 @@ class Xgb_Selection(Feature_Selection):
             n: An integer specifying the number of top features to return.
         """
 
-        xgb = XGBClassifier(objective='binary:logistic', random_state=42, enable_categorical=True)
+        xgb = XGBClassifier(objective='binary:logistic',
+                            random_state=42, enable_categorical=True)
         xgb.fit(self.data, self.target)
-        self.feature_importance = dict(zip(self.data.columns, xgb.feature_importances_))
+        self.feature_importance = dict(
+            zip(self.data.columns, xgb.feature_importances_))
 
 
 class Rf_Selection(Feature_Selection):
@@ -171,7 +178,8 @@ class Rf_Selection(Feature_Selection):
 
         rf = RandomForestClassifier(n_estimators=100, random_state=42)
         rf.fit(self.data, self.target)
-        self.feature_importance = dict(zip(self.data.columns, rf.feature_importances_))
+        self.feature_importance = dict(
+            zip(self.data.columns, rf.feature_importances_))
 
 
 class Lasso_Selection(Feature_Selection):
@@ -236,7 +244,8 @@ class Catboost_Selection(Feature_Selection):
         """
         model = CatBoostClassifier(random_state=42, verbose=False)
         model.fit(self.data, self.target)
-        self.feature_importance = dict(zip(self.data.columns, model.feature_importances_))
+        self.feature_importance = dict(
+            zip(self.data.columns, model.feature_importances_))
 
 
 class RFE_Selection(Feature_Selection):
@@ -270,7 +279,8 @@ class RFE_Selection(Feature_Selection):
         estimator = LinearRegression()
         selector = RFE(estimator, n_features_to_select=n)
         selector = selector.fit(self.data, self.target)
-        self.feature_importance = dict(zip(self.data.columns, selector.ranking_))
+        self.feature_importance = dict(
+            zip(self.data.columns, selector.ranking_))
 
 
 class GBM_Selection(Feature_Selection):
@@ -303,11 +313,10 @@ class GBM_Selection(Feature_Selection):
 
         gbm = GradientBoostingClassifier()
         gbm.fit(self.data, self.target)
-        self.feature_importance = dict(zip(self.data.columns, gbm.feature_importances_))
+        self.feature_importance = dict(
+            zip(self.data.columns, gbm.feature_importances_))
 
 
-# FIXME:
-# TODO: PCA Selection should be wether removed or changed
 class PCA_Selection(Feature_Selection):
     """A class for Principal Component Analysis (PCA) feature selection.
 
@@ -338,7 +347,8 @@ class PCA_Selection(Feature_Selection):
 
         pca = PCA(n_components=n)
         pca.fit(self.data)
-        self.feature_importance = dict(zip(self.data.columns, pca.explained_variance_ratio_))
+        self.feature_importance = dict(
+            zip(self.data.columns, pca.explained_variance_ratio_))
 
 
 class Shap_Selection(Feature_Selection):
@@ -368,20 +378,21 @@ class Shap_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-        model = XGBClassifier(objective='binary:logistic', random_state=42, enable_categorical=True)
+        model = XGBClassifier(objective='binary:logistic',
+                              random_state=42, enable_categorical=True)
         self.data = self.data.replace([np.inf, -np.inf], 0)
         self.data = non_numerical_to_category(self.data)
         model.fit(self.data, self.target)
         explainer = shap.TreeExplainer(model=model)
         shap_values = explainer.shap_values(self.data)
         print(shap_values)
-        self.feature_importance = dict(
-            sorted(dict(zip(self.data.columns, np.abs(shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True))
+        self.feature_importance = dict(sorted(dict(zip(self.data.columns, np.abs(
+            shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True))
 
 
 if __name__ == '__main__':
-    # Spartak you can use encoded dataset using path: "data/WA_Fn-UseC_-Telco-Customer-Churn-encoded.csv"
-    df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
+    df = pd.read_csv(
+        '/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
     df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
     selector = Catboost_Selection(df.drop('Churn', axis=1), df['Churn'])
     selector.fit()
@@ -391,26 +402,3 @@ if __name__ == '__main__':
         sum += i
 
     print(sum)
-
-    # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
-    # df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    # df.fillna(df.max(), inplace=True)
-
-    # selector = MRMR(df, 5, k=None, s=3)
-    # selector.fit(target=df['Churn'])
-    # print(selector.get_importances())
-
-    # sum = 0
-    # for i in selector.get_importances().values():
-    #     sum += i
-    # print(sum)
-
-    # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/WA_Fn-UseC_-Telco-Customer-Churn_tenur_categorical.csv')
-    # df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
-    # selector = Shap_Selection(df.drop('Churn', axis=1), df['Churn'])
-    # selector.fit()
-    # sum = 0
-    # for i in selector.get_importances().values():
-    #     sum += i
-    # print(selector.get_importances())
-    # print(sum)
