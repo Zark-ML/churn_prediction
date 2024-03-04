@@ -158,6 +158,12 @@ catboost_info/
 #PyCharm directories
 .idea/
 
+#Prelimineary backups
+EDA/preliminary_analysis_BACKUP_41652.ipynb
+EDA/preliminary_analysis_BASE_41652.ipynb
+EDA/preliminary_analysis_LOCAL_41652.ipynb
+EDA/preliminary_analysis_REMOTE_41652.ipynb
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
