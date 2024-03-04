@@ -1,30 +1,28 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import shap
 from mrmr import mrmr_classif
 from xgboost import XGBClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import make_classification
 from sklearn.linear_model import Lasso
 from sklearn.feature_selection import RFE
 from catboost import CatBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.decomposition import PCA
-from typing import Dict
 
 
 def get_non_numerical_columns(df):
     non_numerical_columns = df.select_dtypes(exclude=['number']).columns.tolist()
     return non_numerical_columns
 
+
 def non_numerical_to_category(df):
     non_numerical_columns = get_non_numerical_columns(df)
     for col in non_numerical_columns:
         df[col] = df[col].astype('category')
     return df
+
 
 class Feature_Selection:
     """A class for feature selection algorithms.
@@ -44,7 +42,7 @@ class Feature_Selection:
             data: A pandas DataFrame containing the input features.
             target: A pandas Series containing target feature.
         """
-    
+
         self.data = data
         self.target = target
         self.feature_importance = dict()
@@ -73,9 +71,9 @@ class MRMR(Feature_Selection):
         :param k: number of features to select
         :param s: number of iterations
         """
-        
+
         super().__init__(data, target)
-        
+
         self.k = k
         self.s = s
 
@@ -106,9 +104,8 @@ class MRMR(Feature_Selection):
                     rate_dict[best] = [score.max()]
                 selected.append(best)
                 not_selected.remove(best)
-        rate_dict_mean = {key:sum(value) / len(value) for key, value in rate_dict.items()}
+        rate_dict_mean = {key: sum(value) / len(value) for key, value in rate_dict.items()}
         self.feature_importance = rate_dict_mean
-
 
 
 class Xgb_Selection(Feature_Selection):
@@ -143,6 +140,7 @@ class Xgb_Selection(Feature_Selection):
         xgb.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, xgb.feature_importances_))
 
+
 class Rf_Selection(Feature_Selection):
     """A class for Random Forest feature selection.
 
@@ -175,6 +173,7 @@ class Rf_Selection(Feature_Selection):
         rf.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, rf.feature_importances_))
 
+
 class Lasso_Selection(Feature_Selection):
     """A class for Lasso feature selection.
 
@@ -206,7 +205,7 @@ class Lasso_Selection(Feature_Selection):
         lasso = Lasso(alpha=0.1)
         lasso.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, lasso.coef_))
-        
+
 
 class Catboost_Selection(Feature_Selection):
     """A class for CatBoost feature selection.
@@ -238,8 +237,8 @@ class Catboost_Selection(Feature_Selection):
         model = CatBoostClassifier(random_state=42, verbose=False)
         model.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, model.feature_importances_))
-        
-        
+
+
 class RFE_Selection(Feature_Selection):
     """A class for Recursive Feature Elimination (RFE) feature selection.
 
@@ -273,6 +272,7 @@ class RFE_Selection(Feature_Selection):
         selector = selector.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, selector.ranking_))
 
+
 class GBM_Selection(Feature_Selection):
     """A class for Gradient Boosting Machine (GBM) feature selection.
 
@@ -304,6 +304,7 @@ class GBM_Selection(Feature_Selection):
         gbm = GradientBoostingClassifier()
         gbm.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, gbm.feature_importances_))
+
 
 # FIXME:
 # TODO: PCA Selection should be wether removed or changed
@@ -339,6 +340,7 @@ class PCA_Selection(Feature_Selection):
         pca.fit(self.data)
         self.feature_importance = dict(zip(self.data.columns, pca.explained_variance_ratio_))
 
+
 class Shap_Selection(Feature_Selection):
     """A class for Shap feature selection.
 
@@ -373,7 +375,8 @@ class Shap_Selection(Feature_Selection):
         explainer = shap.TreeExplainer(model=model)
         shap_values = explainer.shap_values(self.data)
         print(shap_values)
-        self.feature_importance = dict(sorted(dict(zip(self.data.columns, np.abs(shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True))
+        self.feature_importance = dict(
+            sorted(dict(zip(self.data.columns, np.abs(shap_values).mean(0))).items(), key=lambda x: x[1], reverse=True))
 
 
 if __name__ == '__main__':
@@ -386,7 +389,7 @@ if __name__ == '__main__':
     print(selector.get_importances())
     for i in selector.get_importances().values():
         sum += i
-    
+
     print(sum)
 
     # df = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
