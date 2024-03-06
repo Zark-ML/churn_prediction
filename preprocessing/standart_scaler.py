@@ -1,4 +1,4 @@
-from preprocessing import AbstractPreprocessor
+from preprocessing.preprocessing import AbstractPreprocessor
 import numpy as np
 import json
 
@@ -94,3 +94,4 @@ class StandardScaler(AbstractPreprocessor):
             params = json.load(file)
             self.mean_ = np.array(params['mean'])
             self.std_ = np.array(params['std'])
+
