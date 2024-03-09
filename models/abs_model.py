@@ -114,7 +114,7 @@ class Model(ABC):
         Parameters:
             path (str): The path from which the model should be loaded.
         """
-        self = pickle.load(open(path, 'rb'))
+        self.model = pickle.load(open(path, 'rb'))
         self._is_trained = True
 
     # @abstractmethod
