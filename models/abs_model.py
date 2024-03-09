@@ -1,4 +1,11 @@
 from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod
+from metrics import cross_validate_with_resampling
+from imblearn.over_sampling import SMOTE
+import itertools
+import random
+import pickle
+from tqdm import tqdm
 
 
 class Model(ABC):
@@ -32,7 +39,7 @@ class Model(ABC):
         """
         pass
 
-    @abstractmethod
+    # @abstractmethod
     def _is_train(self):
         """
         Checks if the model is trained.
@@ -40,40 +47,66 @@ class Model(ABC):
         Returns:
             bool: True if the model is trained, False otherwise.
         """
-        pass
+        if self._is_trained:
+            return True
+        return False
 
-    @abstractmethod
+
+    # @abstractmethod
     def fit(self, data, label):
         """
-        Abstract method to train the model.
+        Train the Decision Tree Classifier.
 
         Parameters:
             data: The training data.
             label: The labels corresponding to the training data.
         """
-        pass
+        self.model.fit(data, label)
+        self._is_trained = True
 
-    @abstractmethod
+    # @abstractmethod
+    def fit_with_resampling(self, data, label):
+        """
+        Train the Decision Tree Classifier.
+
+        Parameters:
+            data: The training data.
+            label: The labels corresponding to the training data.
+        """
+        sm = SMOTE(sampling_strategy="all", random_state=42)
+        Xr_train, yr_train = sm.fit_resample(data, label)
+        self.model.fit(Xr_train, yr_train)
+        self._is_trained = True
+
+
+    # @abstractmethod
     def predict(self, test):
         """
-        Abstract method to make predictions.
+        Make predictions using the trained model.
 
         Parameters:
             test: The data for making predictions.
-        """
-        pass
 
-    @abstractmethod
+        Returns:
+            list: Predicted labels.
+        """
+        if not self._is_train():
+            raise ValueError("Model is not trained.")
+        return self.model.predict(test)
+
+    # @abstractmethod
     def save(self, path=None):
         """
-        Abstract method to save the model.
+        Save the trained model to a file.
 
         Parameters:
             path (str): The path where the model should be saved.
         """
-        pass
+        if not self._is_train():
+            raise ValueError("Model is not trained.")
+        pickle.dump(self.model, open(path, 'wb'))
 
-    @abstractmethod
+    # @abstractmethod
     def load(self, path=None):
         """
         Abstract method to load the model.
@@ -81,9 +114,10 @@ class Model(ABC):
         Parameters:
             path (str): The path from which the model should be loaded.
         """
-        pass
+        self = pickle.load(open(path, 'rb'))
+        self._is_trained = True
 
-    @abstractmethod
+    # @abstractmethod
     def hyper_parameter(self, parameters_dict):
         """
         Abstract method for hyperparameter tuning.
@@ -91,19 +125,41 @@ class Model(ABC):
         Parameters:
             parameters_dict (dict): Dictionary containing hyperparameters.
         """
-        pass
+        self.hyper_parameters = parameters_dict
+        self.model.set_params(**self.hyper_parameters)
 
-    @abstractmethod
-    def gs_parameter_tune(self, parameters):
-        """
-        Abstract method for grid search parameter tuning.
+    # @abstractmethod
+    def gs_parameter_tune(self, data, label, parameters, max_search=100):
+    
+        # Perform grid search
+        parameters_list = [
+            {parameter: value for parameter, value in zip(parameters.keys(), values)}
+            for values in itertools.product(*parameters.values())
+        ]
+        #shuffle and take first max_search
+        random.shuffle(parameters_list)
+        parameters_list = parameters_list[:max_search]
 
-        Parameters:
-            parameters: Parameters for grid search.
-        """
-        pass
+        best_score = float('-inf')
 
-    @abstractmethod
+        for params in tqdm(parameters_list):
+            self.hyper_parameter(params)
+            orig_score, resamppled_score = cross_validate_with_resampling(self, data, label, n_splits=5, random_state=42)
+            resampling = (resamppled_score > orig_score)
+            score = resamppled_score if resampling else orig_score
+            if score > best_score:
+                best_score = score
+                best_params = params
+                best_resampling = resampling
+                # best_params['resampling'] = resampling
+
+        print(f'Model: {self.name}')
+        print(f"Best Parameters: {best_params}")
+        print(f"Resempling: {best_resampling}")
+        print(f"Validation Accuracy: {best_score}")
+        return (best_params, best_resampling)
+
+    # @abstractmethod
     def __str__(self):
         """
         Returns the name of the model.
@@ -111,4 +167,4 @@ class Model(ABC):
         Returns:
             str: The name of the model.
         """
-        pass
+        return self.name
