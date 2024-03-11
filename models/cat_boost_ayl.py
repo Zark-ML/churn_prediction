@@ -32,8 +32,8 @@ def objective(trial):
     return sum(roc_auc_scores) / len(roc_auc_scores)
 
 # Extract features and target
-X = pd.read_csv('../data/Telco-Customer-Churn-encoded-data-FE.csv')
-y = pd.read_csv('../data/Telco-Customer-Churn-encoded-label.csv')
+X = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/Telco-Customer-Churn-encoded-data_Features-Selected.csv')
+y = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/Telco-Customer-Churn-encoded-label.csv')
 
 # Split data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
