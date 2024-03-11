@@ -123,11 +123,11 @@ def cross_validate_with_resampling(model, X, y, n_splits=5, random_state=None):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         original_f1_scores.append(f1_score(y_test, y_pred, average='macro'))
-        
         # Train on the resampled dataset
         model.fit(Xr_train, yr_train)
         yr_pred = model.predict(X_test)
         resampled_f1_scores.append(f1_score(y_test, yr_pred, average='macro'))
+
     
     original_f1_scores = np.array(original_f1_scores)
     resampled_f1_scores = np.array(resampled_f1_scores)
