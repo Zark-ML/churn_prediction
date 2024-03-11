@@ -1,9 +1,11 @@
 from sklearn.metrics import f1_score, roc_auc_score, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 import pandas as pd
 import json
+from sklearn.model_selection import StratifiedKFold
+from imblearn.over_sampling import SMOTE
+import numpy as np
 
 class Metrics:
     def __init__(self, y_true, y_pred):
@@ -90,6 +92,47 @@ class Metrics:
         }
         with open(filename, 'w') as file:
             json.dump(results_dict, file)
+
+
+def cross_validate_with_resampling(model, X, y, n_splits=5, random_state=None):
+    """
+    Perform cross-validation with and without SMOTE resampling.
+
+    Parameters:
+    - X: Feature matrix.
+    - y: Labels.
+    - n_splits: Number of folds for cross-validation.
+    - random_state: Random state for reproducibility.
+
+    Returns:
+    - A tuple of (original_f1_scores, resampled_f1_scores).
+    """
+    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    original_f1_scores = []
+    resampled_f1_scores = []
+
+    for train_idx, test_idx in cv.split(X, y):
+        X_train, X_test = X[train_idx], X[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+        
+        # Resample the training data
+        sm = SMOTE(sampling_strategy="all", random_state=random_state)
+        Xr_train, yr_train = sm.fit_resample(X_train, y_train)
+        
+        # Train on the original dataset
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        original_f1_scores.append(f1_score(y_test, y_pred, average='macro'))
+        # Train on the resampled dataset
+        model.fit(Xr_train, yr_train)
+        yr_pred = model.predict(X_test)
+        resampled_f1_scores.append(f1_score(y_test, yr_pred, average='macro'))
+
+    
+    original_f1_scores = np.array(original_f1_scores)
+    resampled_f1_scores = np.array(resampled_f1_scores)
+
+    return original_f1_scores.mean(), resampled_f1_scores.mean()
 
 
 # if __name__=="__main__":
