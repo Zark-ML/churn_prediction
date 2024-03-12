@@ -19,6 +19,7 @@ lib64/
 parts/
 sdist/
 var/
+venv/
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -152,19 +153,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-#CATboost directory
-catboost_info/
-
-#PyCharm directories
 .idea/
-
-#Prelimineary backups
-EDA/preliminary_analysis_BACKUP_41652.ipynb
-EDA/preliminary_analysis_BASE_41652.ipynb
-EDA/preliminary_analysis_LOCAL_41652.ipynb
-EDA/preliminary_analysis_REMOTE_41652.ipynb
-
-feature_selection/__pycache__
+catboost_info/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

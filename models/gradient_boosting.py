@@ -1,11 +1,12 @@
 from models.abs_model import Model
-from sklearn.tree import DecisionTreeClassifier
-class DecisionTreeModel(Model):
+from sklearn.ensemble import GradientBoostingClassifier
+
+class GradientBoostingModel(Model):
     """
-    Decision Tree Classifier implementation of the abstract Model class.
+    Gradient Bossting implementation of the abstract Model class.
 
     Methods:
-        train(self, data, label): Train the Decision Tree Classifier.
+        train(self, data, label): Train the Gradient Bossting Classifier.
         predict(self, test): Make predictions using the trained model.
         save(self, path=None): Save the trained model to a file.
         load(self, path=None): Load a pre-trained model from a file.
@@ -13,14 +14,14 @@ class DecisionTreeModel(Model):
         gs_parameter_tune(self, parameters): Perform grid search parameter tuning.
     """
 
-    def __init__(self, name = 'DecisionTreeModel'):
+    def __init__(self, name = 'GradientBoostingModel'):
         """
-        Initializes a new DecisionTreeModel instance.
+        Initializes a new GradientBoostingModel instance.
 
         Parameters:
             name (str): The name of the model.
         """
         self.name = name
         self._is_trained = False
-        self.model = DecisionTreeClassifier(random_state=42)
+        self.model = GradientBoostingClassifier(random_state=42, )
         self.hyper_parameters = None
