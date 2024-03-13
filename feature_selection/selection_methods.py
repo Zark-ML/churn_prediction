@@ -47,6 +47,7 @@ class Feature_Selection:
         self.data = data
         self.target = target
         self.feature_importance = dict()
+        self.used_model = None
 
     def get_importances(self, n=None):
         """Get the feature importances based on the specified method.
@@ -77,6 +78,7 @@ class MRMR(Feature_Selection):
 
         self.k = k
         self.s = s
+        self.used_model = CatBoostClassifier(random_state=42, verbose=False)
 
     def fit(self):
         """
@@ -133,6 +135,8 @@ class Xgb_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
+        self.used_model = XGBClassifier(objective='binary:logistic',
+                            random_state=42, enable_categorical=True)
 
     def fit(self, n=None):
         """Fit the Xgb_Selection class.
@@ -140,7 +144,6 @@ class Xgb_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-
         xgb = XGBClassifier(objective='binary:logistic',
                             random_state=42, enable_categorical=True)
         xgb.fit(self.data, self.target)
@@ -168,6 +171,7 @@ class Rf_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
+        self.used_model = RandomForestClassifier(n_estimators=100, random_state=42)
 
     def fit(self, n=None):
         """Fit the Rf_Selection class.
@@ -175,7 +179,6 @@ class Rf_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-
         rf = RandomForestClassifier(n_estimators=100, random_state=42)
         rf.fit(self.data, self.target)
         self.feature_importance = dict(
@@ -202,6 +205,7 @@ class Lasso_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
+        self.used_model = Lasso(alpha=0.1)
 
     def fit(self, n=None):
         """Fit the Lasso_Selection class.
@@ -209,7 +213,6 @@ class Lasso_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-
         lasso = Lasso(alpha=0.1)
         lasso.fit(self.data, self.target)
         self.feature_importance = dict(zip(self.data.columns, lasso.coef_))
@@ -235,6 +238,7 @@ class Catboost_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
+        self.used_model = CatBoostClassifier(random_state=42, verbose=False)
 
     def fit(self, n=None):
         """Fit the Catboost_Selection class.
@@ -268,6 +272,7 @@ class RFE_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
+        self.used_model = LinearRegression()
 
     def fit(self, n=None):
         """Fit the RFE_Selection class.
@@ -275,7 +280,6 @@ class RFE_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-
         estimator = LinearRegression()
         selector = RFE(estimator, n_features_to_select=n)
         selector = selector.fit(self.data, self.target)
@@ -301,8 +305,8 @@ class GBM_Selection(Feature_Selection):
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
         """
-
         super().__init__(data, target)
+        self.used_model = GradientBoostingClassifier()
 
     def fit(self, n=None):
         """Fit the GBM_Selection class.
@@ -310,7 +314,6 @@ class GBM_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-
         gbm = GradientBoostingClassifier()
         gbm.fit(self.data, self.target)
         self.feature_importance = dict(
@@ -337,6 +340,7 @@ class PCA_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
+        self.used_model = PCA()
 
     def fit(self, n=None):
         """Fit the PCA_Selection class.
@@ -344,7 +348,6 @@ class PCA_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top principal components to return.
         """
-
         pca = PCA(n_components=n)
         pca.fit(self.data)
         self.feature_importance = dict(
@@ -369,8 +372,9 @@ class Shap_Selection(Feature_Selection):
             data: A pandas DataFrame containing the input features.
             target: Column name of target feature.
         """
-
         super().__init__(data, target)
+        self.used_model = XGBClassifier(objective='binary:logistic',
+                              random_state=42, enable_categorical=True)
 
     def fit(self, n=None):
         """Fit the Shap_Selection class.
