@@ -78,7 +78,7 @@ class MRMR(Feature_Selection):
 
         self.k = k
         self.s = s
-        self.used_model = CatBoostClassifier(random_state=42, verbose=False)
+        self.used_model = CatBoostClassifier(random_state=42, verbose=False, task_type='GPU')
 
     def fit(self):
         """
@@ -102,7 +102,7 @@ class MRMR(Feature_Selection):
             not_selected = list(data_chosen.columns)
             for _ in range(self.k):
                 score = F.loc[not_selected] / corr.loc[not_selected,
-                                                       selected].mean(axis=1).fillna(.00001)
+                selected].mean(axis=1).fillna(.00001)
                 best = score.index[score.argmax()]
                 if best in rate_dict:
                     rate_dict[best].append(score.max())
@@ -135,8 +135,8 @@ class Xgb_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
-        self.used_model = XGBClassifier(objective='binary:logistic',
-                            random_state=42, enable_categorical=True)
+        self.used_model = XGBClassifier(objective='binary:logistic', random_state=42, enable_categorical=True,
+                                        device='cuda')
 
     def fit(self, n=None):
         """Fit the Xgb_Selection class.
@@ -238,7 +238,7 @@ class Catboost_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
-        self.used_model = CatBoostClassifier(random_state=42, verbose=False)
+        self.used_model = CatBoostClassifier(random_state=42, verbose=False, task_type='GPU')
 
     def fit(self, n=None):
         """Fit the Catboost_Selection class.
@@ -246,7 +246,7 @@ class Catboost_Selection(Feature_Selection):
         Args:
             n: An integer specifying the number of top features to return.
         """
-        model = CatBoostClassifier(random_state=42, verbose=False)
+        model = CatBoostClassifier(random_state=42, verbose=False, task_type='GPU')
         model.fit(self.data, self.target)
         self.feature_importance = dict(
             zip(self.data.columns, model.feature_importances_))
@@ -340,7 +340,7 @@ class PCA_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
-        self.used_model = PCA()
+        self.used_model = CatBoostClassifier(random_state=42, verbose=False, task_type='GPU')
 
     def fit(self, n=None):
         """Fit the PCA_Selection class.
@@ -374,7 +374,7 @@ class Shap_Selection(Feature_Selection):
         """
         super().__init__(data, target)
         self.used_model = XGBClassifier(objective='binary:logistic',
-                              random_state=42, enable_categorical=True)
+                                        random_state=42, enable_categorical=True, device='cuda')
 
     def fit(self, n=None):
         """Fit the Shap_Selection class.
@@ -395,8 +395,7 @@ class Shap_Selection(Feature_Selection):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv(
-        '/home/spartak/Desktop/Telco_new/churn_prediction/data/encoded.csv')
+    df = pd.read_csv('../data/encoded.csv')
     df['Churn'] = df['Churn'].replace({'Yes': 1, 'No': 0})
     selector = Catboost_Selection(df.drop('Churn', axis=1), df['Churn'])
     selector.fit()
