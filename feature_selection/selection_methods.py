@@ -205,7 +205,7 @@ class Lasso_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
-        self.used_model = Lasso(alpha=0.1)
+        self.used_model = GradientBoostingClassifier()
 
     def fit(self, n=None):
         """Fit the Lasso_Selection class.
@@ -272,7 +272,7 @@ class RFE_Selection(Feature_Selection):
         """
 
         super().__init__(data, target)
-        self.used_model = LinearRegression()
+        self.used_model = GradientBoostingClassifier()
 
     def fit(self, n=None):
         """Fit the RFE_Selection class.
