@@ -26,14 +26,14 @@ def objective(trial):
         X_train, X_val = X.iloc[train_index], X.iloc[test_index]
         y_train, y_val = y.iloc[train_index], y.iloc[test_index]
         clf.fit(X_train, y_train, eval_set=(X_val, y_val), early_stopping_rounds=50, verbose=True)
-        y_pred = clf.predict_proba(X_val)[:, 1]
-        roc_auc_scores.append(roc_auc_score(y_val, y_pred))
+        y_pred = clf.predict(X_val)
+        roc_auc_scores.append(roc_auc_score(y_val, y_pred))                                                                                                                                            
 
     return sum(roc_auc_scores) / len(roc_auc_scores)
 
 # Extract features and target
-X = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/Telco-Customer-Churn-encoded-data_Features-Selected.csv')
-y = pd.read_csv('/home/spartak/Desktop/Telco_new/churn_prediction/data/Telco-Customer-Churn-encoded-label.csv')
+X = pd.read_csv('/home/uadmin/Desktop/churn_prediction/data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv')
+y = pd.read_csv('data/Telco-Customer-Churn-encoded-label.csv')
 
 # Split data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -50,7 +50,7 @@ best_model = CatBoostClassifier(**best_params, verbose=True, task_type='GPU')
 best_model.fit(X_train, y_train, eval_set=(X_test, y_test), early_stopping_rounds=50, verbose=False)
 
 # Evaluate on test set
-y_pred_proba = best_model.predict_proba(X_test)[:, 1]
+y_pred_proba = best_model.predict(X_test)
 roc_auc = roc_auc_score(y_test, y_pred_proba)
 
 print("Best parameters found:", best_params)

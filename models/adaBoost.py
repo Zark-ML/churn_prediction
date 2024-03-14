@@ -1,5 +1,6 @@
 from models.abs_model import Model
 from sklearn.ensemble import AdaBoostClassifier
+import numpy as np
 
 class AdaBoostModel(Model):
     """
@@ -25,3 +26,8 @@ class AdaBoostModel(Model):
         self._is_trained = False
         self.model = AdaBoostClassifier(random_state=42)
         self.hyper_parameters = None
+        self.parameters = {
+            'n_estimators': range(50, 200, 50),  # Number of weak learners to train iteratively
+            'learning_rate': 10.0 ** np.arange(-5, 0),  # Weight applied to each classifier at each boosting iteration
+            'algorithm': ['SAMME', 'SAMME.R']  # Algorithm to use
+        }

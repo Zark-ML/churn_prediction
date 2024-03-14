@@ -1,5 +1,6 @@
 from models.abs_model import Model
 from sklearn.ensemble import GradientBoostingClassifier
+import numpy as np
 
 class GradientBoostingModel(Model):
     """
@@ -25,3 +26,11 @@ class GradientBoostingModel(Model):
         self._is_trained = False
         self.model = GradientBoostingClassifier(random_state=42, )
         self.hyper_parameters = None
+        self.parameters = {
+            'loss': ['log_loss', 'exponential'],  # Loss function to be optimized
+            'learning_rate': 10.0 ** np.arange(-5, 0),
+            'n_estimators': range(50, 200, 50),
+            'max_depth': range(3, 10),
+            'min_samples_split': range(5, 10),
+            'min_impurity_decrease': 10.0**np.arange(-5, 0)
+        }

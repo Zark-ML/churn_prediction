@@ -129,12 +129,12 @@ class Model(ABC):
         self.model.set_params(**self.hyper_parameters)
 
     # @abstractmethod
-    def gs_parameter_tune(self, data, label, parameters, max_search=100):
+    def gs_parameter_tune(self, data, label, max_search=100):
     
         # Perform grid search
         parameters_list = [
-            {parameter: value for parameter, value in zip(parameters.keys(), values)}
-            for values in itertools.product(*parameters.values())
+            {parameter: value for parameter, value in zip(self.parameters.keys(), values)}
+            for values in itertools.product(*self.parameters.values())
         ]
         #shuffle and take first max_search
         random.shuffle(parameters_list)
@@ -168,3 +168,37 @@ class Model(ABC):
             str: The name of the model.
         """
         return self.name
+
+
+# import itertools
+# import random
+# import optuna
+# from tqdm import tqdm
+
+
+#     def optuna_parameter_tune(self, data, label, parameters, max_search=100):
+#         def objective(trial):
+#             params = {name: trial.suggest_categorical(name, values) for name, values in parameters.items()}
+#             self.hyper_parameter(params)
+#             orig_score, resampled_score = cross_validate_with_resampling(self, data, label, n_splits=5, random_state=42)
+#             resampling = (resampled_score > orig_score)
+#             score = resampled_score if resampling else orig_score
+#             return score
+        
+#         study = optuna.create_study(direction='maximize')
+#         study.optimize(objective, n_trials=max_search)
+        
+#         best_params = study.best_params
+#         best_resampling = (study.best_value > orig_score)
+#         best_score = study.best_value
+
+#         print(f'Model: {self.name}')
+#         print(f"Best Parameters: {best_params}")
+#         print(f"Resampling: {best_resampling}")
+#         print(f"Validation Accuracy: {best_score}")
+        
+#         return best_params, best_resampling
+
+# # Usage
+# your_object = YourClass()
+# your_object.gs_parameter_tune(data, label, parameters)
