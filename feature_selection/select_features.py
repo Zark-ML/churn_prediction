@@ -1,45 +1,31 @@
 import numpy as np
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
 from selection_methods import *
-from sklearn.metrics import f1_score, roc_auc_score
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 import json
-
-selection_methods_list = [
-    MRMR,
-    Xgb_Selection,
-    GBM_Selection,
-    Rf_Selection,
-    Lasso_Selection,
-    Catboost_Selection,
-    RFE_Selection,
-    PCA_Selection,
-    Shap_Selection
-]
 
 class SelectFeatures:
     def __init__(self, data=pd.read_csv('../data/Telco-Customer-Churn-encoded-data-FE.csv'),\
-                  target=pd.read_csv('../data/Telco-Customer-Churn-encoded-label.csv')):
+                  target=pd.read_csv('../data/Telco-Customer-Churn-encoded-label.csv'), selection_methods_list=[
+                    MRMR,
+                    Xgb_Selection,
+                    GBM_Selection,
+                    Rf_Selection,
+                    Lasso_Selection,
+                    Catboost_Selection,
+                    RFE_Selection,
+                    PCA_Selection,
+                    Shap_Selection
+                ]):
         self.data = data
         self.target = target
-        self.selection_methods_list = [
-                                            MRMR,
-                                            Xgb_Selection,
-                                            GBM_Selection,
-                                            Rf_Selection,
-                                            Lasso_Selection,
-                                            Catboost_Selection,
-                                            RFE_Selection,
-                                            PCA_Selection,
-                                            Shap_Selection
-                                        ]
+        self.selection_methods_list = selection_methods_list
         self.importances = pd.DataFrame()
         self.selected_features_dict = dict()
 
     def get_importances(self, save=False, path='../data/feature_importances.csv'):
-        for method in selection_methods_list:
+        for method in self.selection_methods_list:
             method_name = method.__name__
             print(f'Method: {method_name}')
             model = method(self.data, target=self.target)
@@ -71,7 +57,7 @@ class SelectFeatures:
                 if i not in scores:
                     model.fit(X_train[[*scores,i]], y_train)
                     y_pred = model.predict(X_test[[*scores,i]])
-                    score = f1_score(y_test, y_pred, average='macro')
+                    score = f1_score(y_test, y_pred, average='weighted')
                     accuracies.append(score)
                     scores.append(i)
 

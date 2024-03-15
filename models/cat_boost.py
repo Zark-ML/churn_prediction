@@ -24,7 +24,7 @@ class CatBoostModel(Model):
         """
         self.name = name
         self._is_trained = False
-        self.model = CatBoostClassifier(random_state=42,  task_type = 'GPU')
+        self.model = CatBoostClassifier(random_state=42, verbose=False, task_type = 'GPU')
         self.hyper_parameters = None
         self.parameters = {
             'iterations': range(50, 200, 50),  # Number of boosting iterations
@@ -45,5 +45,5 @@ class CatBoostModel(Model):
             parameters_dict (dict): Dictionary containing hyperparameters.
         """
         self.hyper_parameters = parameters_dict
-        self.model = CatBoostClassifier(random_state=42, task_type = 'GPU')
+        self.model = CatBoostClassifier(random_state=42, verbose=False, task_type = 'GPU')
         self.model.set_params(**self.hyper_parameters)

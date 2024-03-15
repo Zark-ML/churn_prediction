@@ -129,7 +129,7 @@ class Model(ABC):
         self.model.set_params(**self.hyper_parameters)
 
     # @abstractmethod
-    def gs_parameter_tune(self, data, label, max_search=100):
+    def gs_parameter_tune(self, data, label, max_search=-1):
     
         # Perform grid search
         parameters_list = [

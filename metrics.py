@@ -19,16 +19,16 @@ class Metrics:
         self.y_true = y_true
         self.y_pred = y_pred
 
-    def roc_auc(self):
+    def roc_auc(self, average='weighted', labels=None):
         """
         Calculate the ROC AUC (Receiver Operating Characteristic - Area Under the Curve) score.
 
         Returns:
         - float: ROC AUC score
         """
-        return roc_auc_score(self.y_true, self.y_pred)
+        return roc_auc_score(self.y_true, self.y_pred, average=average, labels=labels)
 
-    def f1_score(self, average='macro'):
+    def f1_score(self, average='weighted', pos_label=None):
         """
         Calculate the F1 Score.
 
@@ -122,11 +122,11 @@ def cross_validate_with_resampling(model, X, y, n_splits=5, random_state=None):
         # Train on the original dataset
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        original_f1_scores.append(f1_score(y_test, y_pred, average='macro'))
+        original_f1_scores.append(Metrics(y_test, y_pred).f1_score())
         # Train on the resampled dataset
         model.fit(Xr_train, yr_train)
         yr_pred = model.predict(X_test)
-        resampled_f1_scores.append(f1_score(y_test, yr_pred, average='macro'))
+        resampled_f1_scores.append(Metrics(y_test, y_pred).f1_score())
 
     
     original_f1_scores = np.array(original_f1_scores)

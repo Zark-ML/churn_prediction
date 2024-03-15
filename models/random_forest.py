@@ -23,7 +23,7 @@ class RandomForestModel(Model):
         """
         self.name = name
         self._is_trained = False
-        self.model = RandomForestClassifier()
+        self.model = RandomForestClassifier(random_state=42, n_jobs=-1)
         self.hyper_parameters = None
         self.parameters = {
             'n_estimators': range(50, 200, 50),  # Number of trees in the forest
