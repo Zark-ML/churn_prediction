@@ -77,7 +77,7 @@ class SelectModel:
         print(f'F1 Score for {model.__name__} with best params: {score}')
         with open(f'saved_models/models_with_best_params.json', 'r') as f:
             models_with_best_params_dict = json.load(f)
-        models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': resampling, 'score': score}
+        models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': 1 if resampling else 0, 'score': score}
         with open(f'saved_models/models_with_best_params.json', 'w') as f:
             json.dump(models_with_best_params_dict, f)
 
