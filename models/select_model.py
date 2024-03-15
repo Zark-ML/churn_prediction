@@ -1,19 +1,41 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from adaBoost import AdaBoostModel
-from cat_boost import CatBoostModel
-from xg_boost import XGBoostModel
-from gradient_boosting import GradientBoostingModel
-from random_forest import RandomForestModel
-from decision_tree import DecisionTreeModel
+from models.adaBoost import AdaBoostModel
+from models.cat_boost import CatBoostModel
+from models.xg_boost import XGBoostModel
+from models.gradient_boosting import GradientBoostingModel
+from models.random_forest import RandomForestModel
+from models.decision_tree import DecisionTreeModel
 from metrics import Metrics
 
 import json
 
 class SelectModel:
-    def __init__(self, data=pd.read_csv('../data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv'),\
-                  target=pd.read_csv('../data/Telco-Customer-Churn-encoded-label.csv'), models_list=[
+    """
+    Selects the best machine learning model for a given dataset.
+
+    Args:
+        data_path (str, optional): Path to the dataset CSV file. Defaults to '../data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv'.
+        target_path (str, optional): Path to the target labels CSV file. Defaults to '../data/Telco-Customer-Churn-encoded-label.csv'.
+        models_list (list, optional): List of machine learning models to evaluate. Defaults to a predefined list of models.
+
+    Attributes:
+        data (pd.DataFrame): The input data.
+        target (pd.Series): The target labels.
+        models_list (list): List of machine learning models.
+        best_model (object): The best model based on evaluation scores.
+        best_score (float): The highest evaluation score achieved.
+        X_train, X_test, y_train, y_test (pd.DataFrame): Train and test data splits.
+
+    Methods:
+        get_acuracies(): Evaluates each model and selects the best one.
+    """
+
+
+    def __init__(self, data_path = 'data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv',
+                 target_path = 'data/Telco-Customer-Churn-encoded-label.csv',
+                 models_list=[
                     AdaBoostModel,
                     CatBoostModel,
                     XGBoostModel,
@@ -21,17 +43,17 @@ class SelectModel:
                     RandomForestModel,
                     DecisionTreeModel
                 ]):
-        self.data = data
-        self.target = target
+        self.data = pd.read_csv(data_path)
+        self.target = pd.read_csv(target_path)
         self.models_list = models_list
         self.best_model = None
         self.best_score = float('-inf')
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=42)
-        with open(f'./models_with_best_params.json', 'w') as f:
+        with open(f'.saved_models/models_with_best_params.json', 'w') as f:
             json.dump({}, f)
 
     
-    def get_acuracies(self, path='../data/model_acuracies.csv'):
+    def get_acuracies(self):
         for model in self.models_list:
             current_model_name = model.__name__
             print(f'Method: {current_model_name}')
@@ -53,10 +75,10 @@ class SelectModel:
         y_pred = model_with_best_params.predict(self.X_test)
         score = Metrics(self.y_test, y_pred).f1_score()
         print(f'F1 Score for {model.__name__} with best params: {score}')
-        with open(f'./models_with_best_params.json', 'r') as f:
+        with open(f'.saved_models/models_with_best_params.json', 'r') as f:
             models_with_best_params_dict = json.load(f)
         models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': resampling, 'score': score}
-        with open(f'./models_with_best_params.json', 'w') as f:
+        with open(f'.saved_models/models_with_best_params.json', 'w') as f:
             json.dump(models_with_best_params_dict, f)
 
         return (score, model_with_best_params)

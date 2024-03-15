@@ -107,6 +107,10 @@ def cross_validate_with_resampling(model, X, y, n_splits=5, random_state=None):
     Returns:
     - A tuple of (original_f1_scores, resampled_f1_scores).
     """
+    X = X.to_numpy()
+    y = y.to_numpy().ravel()
+
+
     cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
     original_f1_scores = []
     resampled_f1_scores = []
