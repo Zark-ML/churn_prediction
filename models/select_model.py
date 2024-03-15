@@ -49,7 +49,7 @@ class SelectModel:
         self.best_model = None
         self.best_score = float('-inf')
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=42)
-        with open(f'.saved_models/models_with_best_params.json', 'w') as f:
+        with open(f'saved_models/models_with_best_params.json', 'w') as f:
             json.dump({}, f)
 
     
@@ -75,10 +75,10 @@ class SelectModel:
         y_pred = model_with_best_params.predict(self.X_test)
         score = Metrics(self.y_test, y_pred).f1_score()
         print(f'F1 Score for {model.__name__} with best params: {score}')
-        with open(f'.saved_models/models_with_best_params.json', 'r') as f:
+        with open(f'saved_models/models_with_best_params.json', 'r') as f:
             models_with_best_params_dict = json.load(f)
         models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': resampling, 'score': score}
-        with open(f'.saved_models/models_with_best_params.json', 'w') as f:
+        with open(f'saved_models/models_with_best_params.json', 'w') as f:
             json.dump(models_with_best_params_dict, f)
 
         return (score, model_with_best_params)
