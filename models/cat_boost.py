@@ -24,7 +24,7 @@ class CatBoostModel(Model):
         """
         self.name = name
         self._is_trained = False
-        self.model = CatBoostClassifier(random_state=42, verbose=False, task_type = 'GPU')
+        self.model = CatBoostClassifier(random_state=42, verbose=False)
         self.hyper_parameters = None
         self.parameters = {
             'iterations': range(50, 200, 50),  # Number of boosting iterations
@@ -37,6 +37,16 @@ class CatBoostModel(Model):
             # 'cat_features': ['categorical_feature_index']  # Specify categorical features indices
         }
 
+        self.optuna_parameters = {
+        "iterations": trial.suggest_int("iterations", 100, 1000),
+        "learning_rate": trial.suggest_loguniform("learning_rate", 0.001, 0.1),
+        "depth": trial.suggest_int("depth", 3, 10),
+        "l2_leaf_reg": trial.suggest_loguniform("l2_leaf_reg", 1e-2, 10),
+        "border_count": trial.suggest_int("border_count", 32, 255),
+        "random_strength": trial.suggest_loguniform("random_strength", 1e-9, 10),
+        "bagging_temperature": trial.suggest_loguniform("bagging_temperature", 1, 10)
+    }
+
     def hyper_parameter(self, parameters_dict):
         """
         Abstract method for hyperparameter tuning.
@@ -45,5 +55,10 @@ class CatBoostModel(Model):
             parameters_dict (dict): Dictionary containing hyperparameters.
         """
         self.hyper_parameters = parameters_dict
-        self.model = CatBoostClassifier(random_state=42, verbose=False, task_type = 'GPU')
+        self.model = CatBoostClassifier(random_state=42, verbose=False)
         self.model.set_params(**self.hyper_parameters)
+    
+    def load(self, path=None):
+        super().load(path)
+        if not isinstance(self.model, CatBoostClassifier):
+            raise ValueError(f"Catboost cannot load {type(self.mode)}")

@@ -31,3 +31,4 @@ class AdaBoostModel(Model):
             'learning_rate': 10.0 ** np.arange(-5, 0),  # Weight applied to each classifier at each boosting iteration
             'algorithm': ['SAMME', 'SAMME.R']  # Algorithm to use
         }
+        

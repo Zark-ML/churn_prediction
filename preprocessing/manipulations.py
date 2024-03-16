@@ -14,7 +14,7 @@ class Manipulations():
         if data_path:
             self.data_path = data_path
             self.load(data_path)
-        elif data:
+        elif data.shape:
             self.data_ = data
 
         self.data_ = self.data_.drop('customerID', axis=1)

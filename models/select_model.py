@@ -8,6 +8,8 @@ from models.gradient_boosting import GradientBoostingModel
 from models.random_forest import RandomForestModel
 from models.decision_tree import DecisionTreeModel
 from metrics import Metrics
+from copy import deepcopy
+import os
 
 import json
 
@@ -42,27 +44,41 @@ class SelectModel:
                     GradientBoostingModel,
                     RandomForestModel,
                     DecisionTreeModel
-                ]):
+                ],
+                result_path='saved_models/models_with_best_params.json',
+                ):
         self.data = pd.read_csv(data_path)
         self.target = pd.read_csv(target_path)
         self.models_list = models_list
         self.best_model = None
+        self.best_params = None
+        self.best_model_resempling = None
+        self.result_path = result_path
         self.best_score = float('-inf')
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=42)
-        with open(f'saved_models/models_with_best_params.json', 'w') as f:
-            json.dump({}, f)
-
+        if os.path.exists(self.result_path):
+            with open(self.result_path, "r") as f:
+                self.result_dict = json.load(f)
+        else:
+            with open(self.result_path, 'w') as f:
+                self.result_dict = {}
+                json.dump(self.result_dict, f)
     
     def get_acuracies(self):
         for model in self.models_list:
             current_model_name = model.__name__
+            if current_model_name in self.result_dict:
+                print(f"{current_model_name} already processed in the result file")
+                continue
             print(f'Method: {current_model_name}')
-            current_model = model(f'{current_model_name}_model')
-            current_model_best_params, current_model_resempling = current_model.gs_parameter_tune(self.data, self.target)
+            current_model = model(f'{current_model_name}')
+            current_model_best_params, current_model_resempling = current_model.gs_parameter_tune(self.data, self.target, max_search = 100)
             current_model_score, current_model = self.get_model_score(model, current_model_best_params, current_model_resempling)
             if current_model_score > self.best_score:
                 self.best_score = current_model_score
                 self.best_model = current_model
+                self.best_params = current_model_best_params
+                self.best_model_resempling = current_model_resempling
 
     def get_model_score(self, model, best_params, resampling):
         model_with_best_params = model(f'{model.__name__}_model_with_best_params')
@@ -80,16 +96,23 @@ class SelectModel:
         models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': 1 if resampling else 0, 'score': score}
         with open(f'saved_models/models_with_best_params.json', 'w') as f:
             json.dump(models_with_best_params_dict, f)
-
+        self.result_dict = deepcopy(models_with_best_params_dict)
         return (score, model_with_best_params)
         
 
     def __call__(self):
         print('Selecting the best model...')
         self.get_acuracies()
+
+        with open(f'saved_models/the_best_model.json', 'w') as f:
+            self.best_model_config = {self.best_model.__name__ : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
+            json.dump(self.best_model_config, f)
+        
         print(f'Best model: {self.best_model.__name__},\n Best score: {self.best_score}')
-        self.best_model.save(f'saved_models/{self.best_model.__name__}_model.pkl')
+        self.best_model.save(f'saved_models/{self.best_model.__name__}_best.pkl')
+
         return self.best_model
+        
 
 if __name__ == '__main__':
     SelectModel()()

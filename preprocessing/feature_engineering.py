@@ -12,7 +12,7 @@ class FeatureEngineering():
         if data_path:
             self.data_path = data_path
             self.load(data_path)
-        elif data:
+        elif data.shape:
             self.data_ = data
         self.data_.loc[self.data_['tenure'] == 0, 'tenure'] = 1
         self.data_['tenure_group'] = (self.data_['tenure']-1) // 12
@@ -38,8 +38,8 @@ class FeatureEngineering():
         m_t_max = (self.data_['Monthly/Total_Charges'][self.data_['Monthly/Total_Charges'] != float('inf')]).max()
 
         self.data_['Monthly/Total_Charges'].replace(float('inf'),m_t_max, inplace=True)
-
-        return self
+        self.save()
+        return self.data_
 
     def load(self, data_path):
         """
@@ -51,7 +51,7 @@ class FeatureEngineering():
         self.data_ = pd.read_csv(data_path)
 
 
-    def save(self, data_path='../data/Telco-Customer-Churn-encoded-data-FE.csv'):
+    def save(self, data_path='data/Telco-Customer-Churn-encoded-data-FE.csv'):
         """
         Save the cleaned data to a file.
 
@@ -59,7 +59,8 @@ class FeatureEngineering():
             data_path (str, optional): The path to save the cleaned data.
         """
         self.data_.to_csv(data_path, index=False)
-
+        
+        print(f'Engineered Data saved in path: {data_path}')
 
 if __name__ == '__main__':
     df = FeatureEngineering()\
