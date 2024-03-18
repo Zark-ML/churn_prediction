@@ -8,6 +8,7 @@ from preprocessing.onehotencoder import MyOneHotEncoder
 def process_data(data_path = 'data/Telco-Customer-Churn-data.csv',data = None, label = None, label_path = 'data/Telco-Customer-Churn-label.csv', label_encoding = False):
     data = pd.read_csv(data_path) if data_path else data
     label = pd.read_csv(label_path) if label_path else label
+    
 
     data_preprocessing = Manipulations()
     data_preprocessed = data_preprocessing.manipulate(data = data)

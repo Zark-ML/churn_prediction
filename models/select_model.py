@@ -35,8 +35,8 @@ class SelectModel:
     """
 
 
-    def __init__(self, data_path = 'data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv',
-                 target_path = 'data/Telco-Customer-Churn-encoded-label.csv',
+    def __init__(self, data_path = 'data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv', data = None,
+                 target_path = 'data/Telco-Customer-Churn-encoded-label.csv', target = None,
                  models_list=[
                     AdaBoostModel,
                     CatBoostModel,
@@ -47,8 +47,8 @@ class SelectModel:
                 ],
                 result_path='saved_models/models_with_best_params.json',
                 ):
-        self.data = pd.read_csv(data_path)
-        self.target = pd.read_csv(target_path)
+        self.data = pd.read_csv(data_path) if data_path else data
+        self.target = pd.read_csv(target_path) if target_path else target
         self.models_list = models_list
         self.best_model = None
         self.best_params = None
@@ -58,11 +58,11 @@ class SelectModel:
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=42)
         if os.path.exists(self.result_path):
             with open(self.result_path, "r") as f:
-                self.result_dict = json.load(f)
+                self.result_dict = json.loads(f)
         else:
             with open(self.result_path, 'w') as f:
-                self.result_dict = {}
-                json.dump(self.result_dict, f)
+                self.result_dict = dict()
+                json.dump(self.result_dict, f, ensure_ascii=False, indent=4)
     
     def get_acuracies(self):
         for model in self.models_list:
@@ -91,12 +91,15 @@ class SelectModel:
         y_pred = model_with_best_params.predict(self.X_test)
         score = Metrics(self.y_test, y_pred).f1_score()
         print(f'F1 Score for {model.__name__} with best params: {score}')
-        with open(f'saved_models/models_with_best_params.json', 'r') as f:
-            models_with_best_params_dict = json.load(f)
-        models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': 1 if resampling else 0, 'score': score}
+        with open(self.result_path, 'r') as f:
+            content = f.read()
+            models_with_best_params_dict = json.loads(content)
+            models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': 1 if resampling else 0, 'score': score}
         with open(f'saved_models/models_with_best_params.json', 'w') as f:
             json.dump(models_with_best_params_dict, f)
         self.result_dict = deepcopy(models_with_best_params_dict)
+        print(f'Best params for {model.__name__}')
+        print(model_with_best_params)
         return (score, model_with_best_params)
         
 
@@ -105,11 +108,12 @@ class SelectModel:
         self.get_acuracies()
 
         with open(f'saved_models/the_best_model.json', 'w') as f:
-            self.best_model_config = {self.best_model.__name__ : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
+            self.best_model_config = {self.best_model.name : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
             json.dump(self.best_model_config, f)
         
-        print(f'Best model: {self.best_model.__name__},\n Best score: {self.best_score}')
-        self.best_model.save(f'saved_models/{self.best_model.__name__}_best.pkl')
+        print(f'Best model: {self.best_model.name},\n Best score: {self.best_score}')
+        self.best_model.save(f'saved_models/the_best_model.pkl')
+        print(f'The best model is saved in saved_models/the_best_model.pkl')
 
         return self.best_model
         

@@ -91,7 +91,7 @@ class MyOneHotEncoder(AbstractPreprocessor):
         return self.transform()
     def label_encoding(self, label_path, label):
         self.label_ = self.load(label_path) if label_path else label
-        self.label_['Churn'] = np.where(self.label_ == 'Yes', 1, 0)
+        self.label_ = np.where(self.label_ == 'Yes', 1, 0)
         return self.label_
 
     def load(self, data_path):
