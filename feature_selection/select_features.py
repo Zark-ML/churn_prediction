@@ -70,7 +70,7 @@ class SelectFeatures:
         self.selected_data = self.data[selected_features]
         if save:
             with open('./selected_features.json', 'w') as f:
-                json.dump([*selected_features], f)
+                json.dump([*selected_features], f,ensure_ascii=False, indent=4)
             self.selected_data.to_csv(path, index=False)
         return self.selected_data
 

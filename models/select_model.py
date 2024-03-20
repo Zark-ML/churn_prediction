@@ -96,7 +96,7 @@ class SelectModel:
             models_with_best_params_dict = json.loads(content)
             models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': 1 if resampling else 0, 'score': score}
         with open(f'saved_models/models_with_best_params.json', 'w') as f:
-            json.dump(models_with_best_params_dict, f)
+            json.dump(models_with_best_params_dict, f, ensure_ascii=False, indent=4)
         model_with_best_params.save(f'saved_models/{model_with_best_params.name}.pkl')
         self.result_dict = deepcopy(models_with_best_params_dict)
         print(f'Best params for {model.__name__}')
@@ -110,7 +110,7 @@ class SelectModel:
 
         with open(f'saved_models/the_best_model.json', 'w') as f:
             self.best_model_config = {self.best_model.name : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
-            json.dump(self.best_model_config, f)
+            json.dump(self.best_model_config, f, ensure_ascii=False, indent=4)
         
         print(f'Best model: {self.best_model.name},\n Best score: {self.best_score}')
         self.best_model.save(f'saved_models/the_best_model.pkl')

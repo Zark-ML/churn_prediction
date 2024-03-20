@@ -1,0 +1,68 @@
+{
+    "AdaBoostModel": {
+        "best_params": {
+            "n_estimators": 150,
+            "learning_rate": 0.1,
+            "algorithm": "SAMME.R"
+        },
+        "resampling": 0,
+        "score": 0.803384146161987
+    },
+    "CatBoostModel": {
+        "best_params": {
+            "iterations": 50,
+            "learning_rate": 0.1,
+            "depth": 6,
+            "l2_leaf_reg": 1e-05,
+            "border_count": 32,
+            "loss_function": "Logloss",
+            "eval_metric": "AUC"
+        },
+        "resampling": 0,
+        "score": 0.8023229838568622
+    },
+    "XGBoostModel": {
+        "best_params": {
+            "max_depth": 4,
+            "learning_rate": 0.1,
+            "n_estimators": 50,
+            "subsample": 0.7999999999999999,
+            "colsample_bytree": 0.6
+        },
+        "resampling": 0,
+        "score": 0.8087142876406728
+    },
+    "GradientBoostingModel": {
+        "best_params": {
+            "loss": "log_loss",
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "max_depth": 4,
+            "min_samples_split": 6,
+            "min_impurity_decrease": 0.01
+        },
+        "resampling": 0,
+        "score": 0.807420664580039
+    },
+    "RandomForestModel": {
+        "best_params": {
+            "n_estimators": 150,
+            "criterion": "gini",
+            "max_depth": 9,
+            "min_samples_split": 5,
+            "min_impurity_decrease": 1e-05
+        },
+        "resampling": 0,
+        "score": 0.8060301723939551
+    },
+    "DecisionTreeModel": {
+        "best_params": {
+            "criterion": "gini",
+            "max_depth": 5,
+            "min_samples_split": 7,
+            "min_impurity_decrease": 0.0001
+        },
+        "resampling": 0,
+        "score": 0.7977337533379703
+    }
+}

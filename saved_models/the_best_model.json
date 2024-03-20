@@ -1,0 +1,13 @@
+{
+    "XGBoostModel": {
+        "best_params": {
+            "max_depth": 4,
+            "learning_rate": 0.1,
+            "n_estimators": 50,
+            "subsample": 0.7999999999999999,
+            "colsample_bytree": 0.6
+        },
+        "resampling": 0,
+        "score": 0.8087142876406728
+    }
+}
