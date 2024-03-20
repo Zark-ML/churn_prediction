@@ -37,15 +37,15 @@ class CatBoostModel(Model):
             # 'cat_features': ['categorical_feature_index']  # Specify categorical features indices
         }
 
-        self.optuna_parameters = {
-        "iterations": trial.suggest_int("iterations", 100, 1000),
-        "learning_rate": trial.suggest_loguniform("learning_rate", 0.001, 0.1),
-        "depth": trial.suggest_int("depth", 3, 10),
-        "l2_leaf_reg": trial.suggest_loguniform("l2_leaf_reg", 1e-2, 10),
-        "border_count": trial.suggest_int("border_count", 32, 255),
-        "random_strength": trial.suggest_loguniform("random_strength", 1e-9, 10),
-        "bagging_temperature": trial.suggest_loguniform("bagging_temperature", 1, 10)
-    }
+    #     self.optuna_parameters = {
+    #     "iterations": trial.suggest_int("iterations", 100, 1000),
+    #     "learning_rate": trial.suggest_loguniform("learning_rate", 0.001, 0.1),
+    #     "depth": trial.suggest_int("depth", 3, 10),
+    #     "l2_leaf_reg": trial.suggest_loguniform("l2_leaf_reg", 1e-2, 10),
+    #     "border_count": trial.suggest_int("border_count", 32, 255),
+    #     "random_strength": trial.suggest_loguniform("random_strength", 1e-9, 10),
+    #     "bagging_temperature": trial.suggest_loguniform("bagging_temperature", 1, 10)
+    # }
 
     def hyper_parameter(self, parameters_dict):
         """
