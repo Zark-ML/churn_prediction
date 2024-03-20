@@ -81,7 +81,7 @@ class SelectModel:
                 self.best_model_resempling = current_model_resempling
 
     def get_model_score(self, model, best_params, resampling):
-        model_with_best_params = model(f'{model.__name__}_model_with_best_params')
+        model_with_best_params = model(f'{model.__name__}')
         model_with_best_params.hyper_parameter(best_params)
         if(resampling):
             model_with_best_params.fit_with_resampling(self.X_train, self.y_train)
@@ -97,6 +97,7 @@ class SelectModel:
             models_with_best_params_dict[model.__name__] = {'best_params': best_params, 'resampling': 1 if resampling else 0, 'score': score}
         with open(f'saved_models/models_with_best_params.json', 'w') as f:
             json.dump(models_with_best_params_dict, f)
+        model_with_best_params.save(f'saved_models/{model_with_best_params.name}.pkl')
         self.result_dict = deepcopy(models_with_best_params_dict)
         print(f'Best params for {model.__name__}')
         print(model_with_best_params)
