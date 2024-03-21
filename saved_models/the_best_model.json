@@ -1,13 +1,15 @@
 {
-    "XGBoostModel": {
+    "CatBoostModel": {
         "best_params": {
-            "max_depth": 4,
+            "iterations": 100,
             "learning_rate": 0.1,
-            "n_estimators": 50,
-            "subsample": 0.7999999999999999,
-            "colsample_bytree": 0.6
+            "depth": 3,
+            "l2_leaf_reg": 1e-05,
+            "border_count": 32,
+            "loss_function": "Logloss",
+            "eval_metric": "AUC"
         },
         "resampling": 0,
-        "score": 0.8087142876406728
+        "score": 0.8068206482181708
     }
 }

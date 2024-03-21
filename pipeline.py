@@ -57,10 +57,9 @@ class Pipeline:
     def test_model(self):
         self.model = pickle.load(open(self.model_path, 'rb'))
         y_pred = self.model.predict(self.selected_data) 
-        print(f'{self.model.__name__} Has been loaded successfully!')
+        print(f'{self.model.__class__.__name__} Has been loaded successfully!')
         print(f'Predicted labels saved in the file {self.predict_labels_save_path}')
-
-        y_pred.to_csv(self.predict_labels_save_path, index=False)
+        pd.DataFrame(y_pred).to_csv(self.predict_labels_save_path, index=False)
 
         return y_pred
 
@@ -69,19 +68,30 @@ class Pipeline:
             self.preprocessed_data, self.preprocessed_label = process_data(data=self.data.iloc[:, :-1], label=self.data.iloc[:,-1], label_encoding=True, data_path=None, label_path=None)
             self.selected_data = SelectFeatures(selection_methods_list = self.selection_methods_list, data = self.preprocessed_data, target = self.preprocessed_label)()
             
-            self.select_model()
+            return self.select_model()
             
 
         else:
-            self.preprocessed_data = process_data(data=self.data, label_encoding=False)
+            self.preprocessed_data = process_data(data=self.data, label_encoding=False, data_path=None, label_path=None)
             with open('selected_features.json', 'r') as f:
                 selected_features = json.load(f)
             self.selected_data = self.preprocessed_data[selected_features]            
             
-            self.test_model()
+            return self.test_model()
 
             
 if __name__ == '__main__':
-    pipeline = Pipeline(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn.csv',selected_model=False)
-    pipeline()
+    # pipeline = Pipeline(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn_train.csv',selected_model=False)
+    # pipeline()
+    # print('Pipeline has been executed successfully!')
+
+    test = pd.read_csv('data/WA_Fn-UseC_-Telco-Customer-Churn_test.csv')
+    pipline = Pipeline(data = test.iloc[:,:-1], selected_model=True, data_path=None)
+    y_pred = pipline()
+    print(y_pred)
     print('Pipeline has been executed successfully!')
+
+    y_test = test.iloc[:,-1]
+    y_test = np.where(y_test == 'Yes', 1, 0)
+    print(Metrics(y_test, y_pred).f1_score())
+    print(Metrics(y_test, y_pred).confusion_matrix())
