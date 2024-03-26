@@ -1,4 +1,4 @@
-from preprocessing.preprocessing import AbstractPreprocessor
+from preprocessing import AbstractPreprocessor
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import pandas as pd
@@ -113,7 +113,9 @@ class MyOneHotEncoder(AbstractPreprocessor):
         """
         self.encoded.to_csv(data_path, index=False)
         if(not self.label_ is None):
-            pd.DataFrame(self.label_).to_csv(label_path, index=False)
+            df = pd.DataFrame()
+            df['Churn'] = self.label_
+            df.to_csv(label_path, index=False)
 
         print(f'Encoded Data saved in path: {data_path}')
         print(f'Encoded Labels saved in path: {label_path}')

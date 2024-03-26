@@ -26,4 +26,7 @@ def process_data(data_path = 'data/Telco-Customer-Churn-data.csv',data = None, l
     return (data_preprocessed_encoded_engineered,label_encoded) if label_encoding else data_preprocessed_encoded_engineered
 
 if __name__ == '__main__':
-    process_data(label_encoding = True)
+    df = pd.read_csv('../data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    data = df.iloc[:, :-1]
+    label = df.iloc[:, -1]
+    process_data(data_path=None, data=data, label_path = None,label = label,  label_encoding = True)
