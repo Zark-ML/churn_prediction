@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from abc import ABC, abstractmethod
 from metrics import cross_validate_with_resampling
+# from imblearn.combine import SMOTEENN
 from imblearn.over_sampling import SMOTE
 import itertools
 import random
@@ -73,6 +74,7 @@ class Model(ABC):
             data: The training data.
             label: The labels corresponding to the training data.
         """
+        # sm = SMOTEENN(sampling_strategy="all", random_state=42)
         sm = SMOTE(sampling_strategy="all", random_state=42)
         Xr_train, yr_train = sm.fit_resample(data, label)
         self.model.fit(Xr_train, yr_train)

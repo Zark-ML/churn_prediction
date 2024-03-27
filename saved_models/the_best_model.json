@@ -1,15 +1,11 @@
 {
-    "CatBoostModel": {
+    "AdaBoostModel": {
         "best_params": {
-            "iterations": 100,
+            "n_estimators": 150,
             "learning_rate": 0.1,
-            "depth": 3,
-            "l2_leaf_reg": 1e-05,
-            "border_count": 32,
-            "loss_function": "Logloss",
-            "eval_metric": "AUC"
+            "algorithm": "SAMME.R"
         },
         "resampling": 0,
-        "score": 0.8068206482181708
+        "score": 0.8003441207128194
     }
 }

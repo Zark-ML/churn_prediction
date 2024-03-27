@@ -15,6 +15,7 @@ from feature_selection.selection_methods import *
 from models.select_model import SelectModel
 import json
 import pickle
+from sklearn.metrics import f1_score, roc_auc_score
 
 
 class Pipeline:
@@ -68,6 +69,9 @@ class Pipeline:
             self.preprocessed_data, self.preprocessed_label = process_data(data=self.data.iloc[:, :-1], label=self.data.iloc[:,-1], label_encoding=True, data_path=None, label_path=None)
             self.selected_data = SelectFeatures(selection_methods_list = self.selection_methods_list, data = self.preprocessed_data, target = self.preprocessed_label)()
             
+            # self.selected_data = pd.read_csv('data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv')
+            # self.preprocessed_label = pd.read_csv('data/Telco-Customer-Churn-encoded-label.csv')
+
             return self.select_model()
             
 
@@ -81,17 +85,24 @@ class Pipeline:
 
             
 if __name__ == '__main__':
-    # pipeline = Pipeline(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn_train.csv',selected_model=False)
-    # pipeline()
-    # print('Pipeline has been executed successfully!')
+    pipeline = Pipeline(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn_train.csv',selected_model=False)
+    pipeline()
+    print('Pipeline has been executed successfully!')
 
     test = pd.read_csv('data/WA_Fn-UseC_-Telco-Customer-Churn_test.csv')
-    pipline = Pipeline(data = test.iloc[:,:-1], selected_model=True, data_path=None)
+    pipline = Pipeline(data = test.iloc[:,:-1], selected_model=True, data_path=None, model_path='saved_models/the_best_model.pkl')
     y_pred = pipline()
     print(y_pred)
     print('Pipeline has been executed successfully!')
 
     y_test = test.iloc[:,-1]
     y_test = np.where(y_test == 'Yes', 1, 0)
-    print(Metrics(y_test, y_pred).f1_score())
+    print('f1:', Metrics(y_test, y_pred).f1_score())
+    print('roc_auc:', Metrics(y_test, y_pred).roc_auc())
+    print('skroc_auc:', roc_auc_score(y_test, y_pred))
+    print('skf1:', f1_score(y_test, y_pred, average='weighted'))
+    print('churn acuracy score:', y_pred.sum()/y_test.sum())
     print(Metrics(y_test, y_pred).confusion_matrix())
+    Metrics(y_test, y_pred).save_metrics(filename='saved_models/best_model_metrics.json')
+    Metrics(y_test, y_pred).plot_confusion_matrix()
+

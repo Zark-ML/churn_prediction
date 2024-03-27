@@ -4,7 +4,9 @@ import seaborn as sns
 import pandas as pd
 import json
 from sklearn.model_selection import StratifiedKFold
+# from imblearn.combine import SMOTEENN
 from imblearn.over_sampling import SMOTE
+
 import numpy as np
 
 class Metrics:
@@ -120,8 +122,9 @@ def cross_validate_with_resampling(model, X, y, n_splits=5, random_state=None):
         y_train, y_test = y[train_idx], y[test_idx]
         
         # Resample the training data
-        sm = SMOTE(sampling_strategy="all", random_state=random_state)
+        sm = SMOTE(random_state=random_state)
         Xr_train, yr_train = sm.fit_resample(X_train, y_train)
+        # Xr_test, yr_test = sm.fit_resample(X_test, y_test)
         
         # Train on the original dataset
         model.fit(X_train, y_train)
@@ -130,7 +133,7 @@ def cross_validate_with_resampling(model, X, y, n_splits=5, random_state=None):
         original_f1_scores.append(f1_score(y_test, y_pred, average='weighted'))
         # Train on the resampled dataset
         model.fit(Xr_train, yr_train)
-        yr_pred = model.predict(X_test)
+        y_pred = model.predict(X_test)
         # resampled_f1_scores.append(Metrics(y_test, y_pred).f1_score())
         resampled_f1_scores.append(f1_score(y_test, y_pred, average='weighted'))
 

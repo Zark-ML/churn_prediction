@@ -1,4 +1,4 @@
-from preprocessing import AbstractPreprocessor
+from preprocessing.preprocessing import AbstractPreprocessor
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import pandas as pd

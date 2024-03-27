@@ -58,7 +58,8 @@ class SelectModel:
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=42)
         if os.path.exists(self.result_path):
             with open(self.result_path, "r") as f:
-                self.result_dict = json.loads(f)
+                content = f.read()
+                self.result_dict = json.loads(content)
         else:
             with open(self.result_path, 'w') as f:
                 self.result_dict = dict()
@@ -107,7 +108,6 @@ class SelectModel:
     def __call__(self):
         print('Selecting the best model...')
         self.get_acuracies()
-
         with open(f'saved_models/the_best_model.json', 'w') as f:
             self.best_model_config = {self.best_model.name : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
             json.dump(self.best_model_config, f, ensure_ascii=False, indent=4)
