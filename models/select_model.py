@@ -10,6 +10,7 @@ from models.decision_tree import DecisionTreeModel
 from metrics import Metrics
 from copy import deepcopy
 import os
+import pickle
 
 import json
 
@@ -107,12 +108,12 @@ class SelectModel:
 
     def __call__(self):
         print('Selecting the best model...')
-        self.get_acuracies()
+        self.get_acuracies()        
         with open(f'saved_models/the_best_model.json', 'w') as f:
-            self.best_model_config = {self.best_model.name : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
+            self.best_model_config = {self.best_model.__class__.__name__ : {'best_params': self.best_params, 'resampling': 1 if self.best_model_resempling else 0, 'score': self.best_score}}
             json.dump(self.best_model_config, f, ensure_ascii=False, indent=4)
         
-        print(f'Best model: {self.best_model.name},\n Best score: {self.best_score}')
+        print(f'Best model: {self.best_model.__class__.__name__},\n Best score: {self.best_score}')
         self.best_model.save(f'saved_models/the_best_model.pkl')
         print(f'The best model is saved in saved_models/the_best_model.pkl')
 

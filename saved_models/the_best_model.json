@@ -1,11 +1,7 @@
 {
-    "AdaBoostModel": {
-        "best_params": {
-            "n_estimators": 150,
-            "learning_rate": 0.1,
-            "algorithm": "SAMME.R"
-        },
+    "NoneType": {
+        "best_params": null,
         "resampling": 0,
-        "score": 0.8003441207128194
+        "score": -Infinity
     }
 }

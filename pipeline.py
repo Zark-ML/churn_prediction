@@ -11,6 +11,7 @@ from models.xg_boost import XGBoostModel
 from models.gradient_boosting import GradientBoostingModel
 from models.random_forest import RandomForestModel
 from models.decision_tree import DecisionTreeModel
+from models.svm import SVMModel
 from feature_selection.selection_methods import *
 from models.select_model import SelectModel
 import json
@@ -22,23 +23,24 @@ class Pipeline:
     def __init__(self, data = None, data_path = 'data/WA_Fn-UseC_-Telco-Customer-Churn.csv', selected_model = True, 
                     model_path = 'saved_models/the_best_model.pkl', predict_labels_save_path = 'data/predicted_labels.csv',
                     models_list=[
-                                    AdaBoostModel,
-                                    CatBoostModel,
-                                    XGBoostModel,
-                                    GradientBoostingModel,
-                                    RandomForestModel,
-                                    DecisionTreeModel
+                                    # AdaBoostModel,
+                                    # CatBoostModel,
+                                    # XGBoostModel,
+                                    # GradientBoostingModel,
+                                    # RandomForestModel,
+                                    # DecisionTreeModel,
+                                    SVMModel
                                 ] ,
                     selection_methods_list=[
                         MRMR,
-                        Xgb_Selection,
-                        GBM_Selection,
-                        Rf_Selection,
-                        Lasso_Selection,
-                        Catboost_Selection,
-                        RFE_Selection,
-                        PCA_Selection,
-                        Shap_Selection
+                        # Xgb_Selection,
+                        # GBM_Selection,
+                        # Rf_Selection,
+                        # Lasso_Selection,
+                        # Catboost_Selection,
+                        # RFE_Selection,
+                        # PCA_Selection,
+                        # Shap_Selection
                      ]) -> None:
         
         self.data = pd.read_csv(data_path) if data_path else data
@@ -66,11 +68,11 @@ class Pipeline:
 
     def __call__(self):
         if not self.selected_model:
-            self.preprocessed_data, self.preprocessed_label = process_data(data=self.data.iloc[:, :-1], label=self.data.iloc[:,-1], label_encoding=True, data_path=None, label_path=None)
-            self.selected_data = SelectFeatures(selection_methods_list = self.selection_methods_list, data = self.preprocessed_data, target = self.preprocessed_label)()
+            # self.preprocessed_data, self.preprocessed_label = process_data(data=self.data.iloc[:, :-1], label=self.data.iloc[:,-1], label_encoding=True, data_path=None, label_path=None)
+            # self.selected_data = SelectFeatures(selection_methods_list = self.selection_methods_list, data = self.preprocessed_data, target = self.preprocessed_label)()
             
-            # self.selected_data = pd.read_csv('data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv')
-            # self.preprocessed_label = pd.read_csv('data/Telco-Customer-Churn-encoded-label.csv')
+            self.selected_data = pd.read_csv('data/Telco-Customer-Churn-encoded-data-FE-Features-Selected.csv')
+            self.preprocessed_label = pd.read_csv('data/Telco-Customer-Churn-encoded-label.csv')
 
             return self.select_model()
             
@@ -85,9 +87,9 @@ class Pipeline:
 
             
 if __name__ == '__main__':
-    pipeline = Pipeline(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn_train.csv',selected_model=False)
-    pipeline()
-    print('Pipeline has been executed successfully!')
+    # pipeline = Pipeline(data_path='data/WA_Fn-UseC_-Telco-Customer-Churn_train.csv',selected_model=False)
+    # pipeline()
+    # print('Pipeline has been executed successfully!')
 
     test = pd.read_csv('data/WA_Fn-UseC_-Telco-Customer-Churn_test.csv')
     pipline = Pipeline(data = test.iloc[:,:-1], selected_model=True, data_path=None, model_path='saved_models/the_best_model.pkl')
