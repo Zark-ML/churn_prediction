@@ -33,7 +33,7 @@ class FeatureEngineering():
             self.data_ = data
 
         self.data_['Monthly/Total_Charges'] = (self.data_['MonthlyCharges'] / self.data_['TotalCharges'])
-        self.data_['TotalCharges/tenure'] = (self.data_['TotalCharges'] / self.data_['tenure'])
+        # self.data_['TotalCharges/tenure'] = (self.data_['TotalCharges'] / self.data_['tenure'])
 
         m_t_max = (self.data_['Monthly/Total_Charges'][self.data_['Monthly/Total_Charges'] != float('inf')]).max()
 
