@@ -1,0 +1,14 @@
+{
+    "GradientBoostingModel": {
+        "best_params": {
+            "loss": "log_loss",
+            "learning_rate": 0.1,
+            "n_estimators": 150,
+            "max_depth": 3,
+            "min_samples_split": 6,
+            "min_impurity_decrease": 0.0001
+        },
+        "resampling": 1,
+        "score": 0.8044499841427928
+    }
+}
